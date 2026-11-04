@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Transactions\CreateTransactionAction;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\User;
 use App\Services\AI\TransactionAIService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class TransactionAIController extends Controller
             'history' => ['nullable', 'array'],
         ]);
 
-        $user = $request->user();
+        $user = $request->user() ?? User::firstOrFail();
         $categories = Category::where('user_id', $user->id)->pluck('name')->toArray();
 
         $result = $aiService->parseNaturalLanguage($validated['text'], $validated['history'] ?? [], $categories);

@@ -70,4 +70,56 @@ class TransactionAPITest extends TestCase
             ->assertJsonPath('status', 'parsed')
             ->assertJsonPath('transaction.amount', 45);
     }
+
+    public function test_ai_parser_requests_clarification_when_amount_is_missing(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/ai/parse', [
+            'text' => 'Bought some coffee this afternoon',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'needs_clarification')
+            ->assertJsonPath('transaction.amount', null)
+            ->assertJsonPath('question', 'I understand your note, but could you specify the amount?');
+    }
+
+    public function test_user_cannot_create_transaction_for_unauthorized_account(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
+        $category = Category::create([
+            'user_id' => $user->id,
+            'name' => 'General',
+            'type' => 'Expense',
+        ]);
+
+        $foreignAccount = Account::create([
+            'user_id' => $otherUser->id,
+            'name' => 'Foreign Account',
+            'type' => 'Bank',
+            'initial_balance' => 1000.00,
+        ]);
+
+        $payload = [
+            'description' => 'Malicious Outflow',
+            'amount' => 50.00,
+            'date' => now()->toDateString(),
+            'type' => 'Expense',
+            'status' => 'Paid',
+            'account_id' => $foreignAccount->id,
+            'category_id' => $category->id,
+        ];
+
+        $response = $this->postJson('/api/transactions', $payload);
+
+        // FormRequest exists rule enforces user isolation
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['account_id']);
+    }
 }

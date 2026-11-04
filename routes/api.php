@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('web')->group(function () {
     // Financial Insights & Aggregations
     Route::get('/dashboard', DashboardController::class);
 

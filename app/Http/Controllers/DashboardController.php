@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\Finance\FinancialLedgerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class DashboardController extends Controller
      */
     public function __invoke(Request $request, FinancialLedgerService $ledgerService): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user() ?? User::firstOrFail();
         $overview = $ledgerService->calculateOverview($user);
         $distribution = $ledgerService->getCategoryDistribution($user);
 

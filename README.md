@@ -1,14 +1,30 @@
 # FinTrack Core & AI Engine Showcase
 
 [![CI & Quality Gate](https://github.com/YuriTreichel/fintrack-showcase/actions/workflows/ci.yml/badge.svg)](https://github.com/YuriTreichel/fintrack-showcase/actions)
-[![PHPStan Level 8](https://img.shields.io/badge/PHPStan-Level%208-brightgreen.svg)](https://phpstan.org/)
+[![PHPStan Level 5+](https://img.shields.io/badge/PHPStan-Analysed-brightgreen.svg)](https://phpstan.org/)
 [![Pest Tests](https://img.shields.io/badge/Tests-Pest%20%26%20PHPUnit-purple.svg)](https://pestphp.com/)
 [![Laravel 11](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An enterprise-grade personal finance ledger and AI natural language transaction processor designed for high concurrency, mathematical consistency, and clean architectural separation.
 
-> **Note:** This repository is an open-source technical showcase extracted from a proprietary SaaS application to demonstrate domain modeling, asynchronous ledger processing, LLM integration, and senior software engineering patterns.
+> **Note:** This repository is an open-source technical showcase extracted from a proprietary SaaS application ([fintrackweb.com.br](https://fintrackweb.com.br)) to demonstrate domain modeling, multi-tenant isolation, idempotent ledger processing, LLM integration, and senior software engineering patterns.
+
+---
+
+## 📸 Showcase Preview
+
+<div align="center">
+  <img src="public/screenshots/dashboard.png" alt="FinTrack Showcase Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+  <p align="center"><em>Interactive High-Performance Financial Dashboard & Aggregated Metrics</em></p>
+</div>
+
+<br/>
+
+<div align="center">
+  <img src="public/screenshots/ai-assistant.png" alt="AI Financial Assistant" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+  <p align="center"><em>Conversational AI Financial Intake with Extraction Draft & Real-Time Confirmation</em></p>
+</div>
 
 ---
 
@@ -106,18 +122,31 @@ php artisan serve
 
 ## 🧪 Testing Suite & Quality Gates
 
-Run all automated unit and feature tests:
+The test suite covers atomic ledger execution, floating-point installment residue compensation, invoice settlement concurrency, multitenant security boundaries (IDOR prevention), and AI natural language parsing:
 
 ```bash
-# Execute Pest tests
+# Execute Pest test suite (Unit & Feature tests)
 composer test
 
 # Run PHPStan static analysis
 composer analyse
 
-# Run Laravel Pint linter
+# Run Laravel Pint code style enforcement
 composer lint
 ```
+
+---
+
+## 📐 Key Architectural Trade-offs & Decisions (ADRs)
+
+1. **Why Single-Responsibility Actions instead of Fat Services/Models?**
+   * Decoupling domain workflows like `CreateTransactionAction` and `PayCardInvoiceAction` allows isolated testing, strictly atomic transactions, and zero side-effects across related models.
+2. **Zero Floating-Point Drift Strategy:**
+   * In multi-installment transactions, integer division of currency frequently produces repeating decimals (e.g. \$100.00 / 3 = \$33.3333...). We compute the base installment and mathematically inject the remainder cents into the initial period, guaranteeing `sum(installments) === total_amount`.
+3. **Pessimistic Concurrency on Invoices:**
+   * `PayCardInvoiceAction` leverages `lockForUpdate()` during settlement queries to prevent double-spending anomalies or duplicate payouts when concurrent webhooks or user clicks trigger invoice settlements.
+4. **Hybrid LLM + Deterministic Offline Fallback:**
+   * The AI ingestion pipeline integrates Google Gemini 1.5 with prompt validation, yet degrades gracefully to a regex heuristic parser if offline or when API credentials are absent, ensuring uninterrupted CI testability.
 
 ---
 

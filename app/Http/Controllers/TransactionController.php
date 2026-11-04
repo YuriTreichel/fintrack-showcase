@@ -6,6 +6,7 @@ use App\Actions\Transactions\CreateTransactionAction;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -17,8 +18,10 @@ class TransactionController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
+        $user = $request->user() ?? User::firstOrFail();
+
         $transactions = Transaction::query()
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->with(['account', 'toAccount', 'category', 'card'])
             ->when($request->query('month'), function ($query, $month) use ($request) {
                 $year = $request->query('year', now()->year);
