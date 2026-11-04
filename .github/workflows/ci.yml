@@ -1,0 +1,47 @@
+name: CI & Quality Gate
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.2, 8.3, 8.4]
+
+    name: PHP ${{ matrix.php }} Quality Check
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath, curl, zip, pcntl
+          coverage: none
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generate App Key
+        run: php artisan key:generate
+
+      - name: Check Code Style (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Static Analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --memory-limit=2G
+
+      - name: Execute Tests (Pest)
+        run: vendor/bin/pest --ci
+

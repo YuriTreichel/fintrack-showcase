@@ -1,0 +1,16 @@
+includes:
+    - vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+
+    level: 5
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        - '#Access to an undefined property App\\Models\\Transaction::\$name#'
+        - '#Access to an undefined property App\\Models\\Transaction::\$total#'
+
+
