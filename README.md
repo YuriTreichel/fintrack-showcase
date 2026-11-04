@@ -5,9 +5,11 @@
 [![Pest Tests](https://img.shields.io/badge/Tests-Pest%20%26%20PHPUnit-purple.svg)](https://pestphp.com/)
 [![Laravel 11](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
 An enterprise-grade personal finance ledger and AI natural language transaction processor designed for high concurrency, mathematical consistency, and clean architectural separation.
 
+> 🌐 **Live Demo:** [fintrack-showcase.onrender.com](https://fintrack-showcase.onrender.com) *(Free tier instance - ready to test)*  
 > **Note:** This repository is an open-source technical showcase extracted from a proprietary SaaS application ([fintrackweb.com.br](https://fintrackweb.com.br)) to demonstrate domain modeling, multi-tenant isolation, idempotent ledger processing, LLM integration, and senior software engineering patterns.
 
 ---

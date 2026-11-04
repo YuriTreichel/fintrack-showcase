@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: fintrack-showcase
+    runtime: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: APP_NAME
+        value: "FinTrack Showcase"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/database/database.sqlite
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
