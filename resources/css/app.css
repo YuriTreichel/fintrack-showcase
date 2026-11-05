@@ -1,8 +1,448 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
 
-body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+/*
+  PERFORMANCE: Fallback font-face com font-display:swap.
+  Garante que o texto seja exibido com a fonte do sistema enquanto a Inter carrega
+  via Google Fonts. Elimina o FOIT (Flash of Invisible Text) que causava FCP alto.
+*/
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local('Inter'), local('Inter-Regular');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+@theme {
+  --color-fin-bg: var(--bg);
+  --color-fin-surface: var(--surface);
+  --color-fin-mint: var(--mint);
+  --color-fin-peach: var(--peach);
+
+  --color-fin-text: var(--text-primary);
+  --color-fin-text-muted: var(--text-muted);
+  --color-fin-border: var(--border-color);
+  --color-fin-element: var(--element);
+
+  --font-sans: "Fira Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  :root {
+    --bg: #f3f4f6; /* zinc-100 */
+    --surface: #ffffff;
+    --mint: #98e5dd; /* turquoise */
+    --peach: #ea580c; /* orange-600 */
+    --text-primary: #18181b; /* zinc-900 */
+    --text-muted: #52525b; /* zinc-600 */
+    --border-color: #e4e4e7; /* zinc-200 */
+    --element: #000000; /* pure black base for light mode surface highlights */
+    color-scheme: light;
+  }
+
+  .dark {
+    --bg: #111313;
+    --surface: #1a1c1c;
+    --mint: #98e5dd;
+    --peach: #eeb58f;
+    --text-primary: #f4f4f5; /* zinc-100 */
+    --text-muted: #a1a1aa; /* zinc-400 */
+    --border-color: rgba(255, 255, 255, 0.05); /* white/5 */
+    --element: #ffffff; /* pure white base for dark mode surface highlights */
+    color-scheme: dark;
+  }
+
+  /* Wealth Mode Overrides */
+  .wealth-mode {
+    --mint: #efbf5f; /* Gold Amber */
+    --peach: #f59e0b; /* Amber 600 */
+  }
+
+  body {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 60%),
+      radial-gradient(at 100% 100%, rgba(234, 88, 12, 0.1) 0px, transparent 60%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .wealth-mode body {
+    background-image:
+      radial-gradient(at 0% 0%, rgba(239, 191, 95, 0.15) 0px, transparent 60%),
+      radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.1) 0px, transparent 60%);
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(at 0% 0%, rgba(152, 229, 221, 0.15) 0px, transparent 65%),
+      radial-gradient(
+        at 100% 100%,
+        rgba(238, 181, 143, 0.12) 0px,
+        transparent 65%
+      );
+  }
+
+  .dark.wealth-mode body {
+    background-image:
+      radial-gradient(at 0% 0%, rgba(239, 191, 95, 0.18) 0px, transparent 65%),
+      radial-gradient(
+        at 100% 100%,
+        rgba(245, 158, 11, 0.12) 0px,
+        transparent 65%
+      );
+  }
+
+  * {
+    border-color: var(--border-color);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Custom animate-in mapped manually */
+  .animate-in {
+    animation-duration: 500ms;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  .zoom-in {
+    animation-name: zoomIn;
+  }
+  .slide-in-from-bottom-4 {
+    animation-name: slideUp;
+  }
+
+  .duration-500 {
+    animation-duration: 500ms;
+  }
+  .duration-700 {
+    animation-duration: 700ms;
+  }
+  .fill-mode-both {
+    animation-fill-mode: both;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 12px);
+  }
+  .mt-safe {
+    margin-top: env(safe-area-inset-top, 12px);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 12px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 15px rgba(152, 229, 221, 0.4));
+  }
+  50% {
+    opacity: 0.5;
+    filter: drop-shadow(0 0 5px rgba(152, 229, 221, 0.2));
+  }
+}
+
+/* Landing Page Glow Effects */
+@keyframes glow-mint {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(152, 229, 221, 0.4),
+      0 0 60px rgba(152, 229, 221, 0.15),
+      0 0 100px rgba(152, 229, 221, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(152, 229, 221, 0.5),
+      0 0 80px rgba(152, 229, 221, 0.2),
+      0 0 120px rgba(152, 229, 221, 0.08);
+  }
+}
+
+@keyframes glow-mint-lg {
+  0%,
+  100% {
+    box-shadow:
+      0 0 30px rgba(152, 229, 221, 0.4),
+      0 0 80px rgba(152, 229, 221, 0.2),
+      0 0 140px rgba(152, 229, 221, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 50px rgba(152, 229, 221, 0.55),
+      0 0 110px rgba(152, 229, 221, 0.25),
+      0 0 180px rgba(152, 229, 221, 0.1);
+  }
+}
+
+@keyframes glow-card {
+  0%,
+  100% {
+    box-shadow:
+      0 0 25px rgba(152, 229, 221, 0.08),
+      0 0 60px rgba(152, 229, 221, 0.04);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(152, 229, 221, 0.15),
+      0 0 90px rgba(152, 229, 221, 0.06);
+  }
+}
+
+.animate-glow-mint {
+  box-shadow: 0 0 20px rgba(152, 229, 221, 0.3), 0 0 60px rgba(152, 229, 221, 0.1);
+}
+
+.animate-glow-mint-lg {
+  box-shadow: 0 0 30px rgba(152, 229, 221, 0.3), 0 0 80px rgba(152, 229, 221, 0.15);
+}
+
+.animate-glow-card {
+  box-shadow: 0 0 25px rgba(152, 229, 221, 0.06);
+}
+
+/* ===== Landing Page Performance: CSS Animations ===== */
+
+/* Dot pattern via CSS (lighter than SVG) */
+.landing-dot-pattern {
+  background-image: radial-gradient(circle, rgba(161,161,170,0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Enhanced landing background with gradient mesh */
+.landing-bg {
+  background-color: #020617;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% 20%, rgba(152, 229, 221, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 25%, rgba(238, 181, 143, 0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 50% 80%, rgba(152, 229, 221, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 75% 60%, rgba(100, 120, 200, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 25% 70%, rgba(238, 181, 143, 0.03) 0%, transparent 50%);
+}
+
+/* Subtle grain noise texture */
+.landing-bg::after {
+  display: none;
+}
+
+/* ==========================================================================
+   PERFORMANCE: Hero animations — CSS puro em vez de Framer Motion.
+   CSS animations rodam no compositor thread (GPU), não bloqueiam o main thread.
+   Isso reduz o TBT significativamente sem sacrificar o visual.
+   ========================================================================== */
+
+/* Fade-in simples — wrapper do hero */
+.hero-fade-in {
+  animation: hero-appear 0.7s ease-out both;
+}
+
+/* Slide-up com fade — para elementos internos do hero (h1, p, buttons) */
+.hero-slide-up {
+  opacity: 0;
+  animation: hero-slide-appear 0.7s ease-out both;
+}
+
+@keyframes hero-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes hero-slide-appear {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Orb classes - kept for legacy but not rendered (AnimatedBackground removed) */
+
+/* Ring rotation animations - removed (causes jank) */
+.animate-landing-ring-cw,
+.animate-landing-ring-ccw {
+  display: none;
+}
+
+/* Float/sparkle animations - removed (causes jank) */
+.animate-landing-hero-float,
+.animate-landing-float-up,
+.animate-landing-float-down,
+.animate-landing-float-diagonal,
+.animate-landing-float-large,
+.animate-landing-sparkle {
+  transform: none;
+}
+/* Shimmer sweep */
+.animate-landing-shimmer {
+  animation: landing-shimmer 3s ease-in-out 4s infinite;
+}
+
+@keyframes landing-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ==========================================================================
+   LANDING PAGE MOBILE OPTIMIZATIONS (Scroll Performance)
+   ========================================================================== */
+@media (max-width: 1023px) {
+  body, 
+  .landing-bg {
+    background-attachment: scroll !important;
+  }
+
+  .landing-bg::after {
+    display: none !important;
+  }
+
+  .landing-dot-pattern {
+    display: none !important;
+  }
+}
+
+/* ===== Tiptap Editor & Blog Content Styles ===== */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #52525b; /* zinc-600 */
+  pointer-events: none;
+  height: 0;
+}
+
+.blog-content-container {
+    @apply prose prose-invert max-w-none;
+}
+
+.blog-content-container h1 {
+    @apply text-white font-black tracking-tighter text-4xl md:text-5xl mb-8 mt-12;
+}
+
+.blog-content-container h2 {
+    @apply text-white font-black tracking-tighter text-3xl md:text-4xl mb-6 mt-10;
+}
+
+.blog-content-container h3 {
+    @apply text-white font-black tracking-tighter text-2xl md:text-3xl mb-4 mt-8;
+}
+
+.blog-content-container p {
+    @apply text-zinc-400 leading-relaxed text-lg mb-6;
+}
+
+.blog-content-container strong {
+    @apply text-white font-bold;
+}
+
+.blog-content-container a {
+    @apply text-fin-mint underline font-bold transition-all hover:brightness-110;
+}
+
+.blog-content-container ul {
+    @apply list-disc list-inside space-y-2 mb-6 text-zinc-400;
+}
+
+.blog-content-container ol {
+    @apply list-decimal list-inside space-y-2 mb-6 text-zinc-400;
+}
+
+.blog-content-container li {
+    @apply text-lg;
+}
+
+.blog-content-container blockquote {
+    @apply border-l-4 border-fin-mint bg-fin-mint/5 px-6 py-4 rounded-2xl italic text-zinc-300 mb-8 mt-8;
+}
+
+.blog-content-container img {
+    @apply rounded-[32px] shadow-2xl my-12 border border-white/5 mx-auto transition-transform duration-700 hover:scale-[1.02];
+}
+
+.blog-content-container hr {
+    @apply border-white/10 my-12;
+}

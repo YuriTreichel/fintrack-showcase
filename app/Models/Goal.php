@@ -2,36 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Goal extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'name',
         'target_amount',
         'current_amount',
         'deadline',
+        'is_completed',
         'color',
+        'icon',
     ];
 
     protected $casts = [
+        'is_completed' => 'boolean',
+        'deadline' => 'date',
         'target_amount' => 'decimal:2',
         'current_amount' => 'decimal:2',
-        'deadline' => 'date',
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function transactions(): HasMany
+    public function transactions()
     {
         return $this->hasMany(Transaction::class);
     }

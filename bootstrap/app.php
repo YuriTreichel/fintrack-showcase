@@ -14,6 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->validateCsrfTokens(except: [
             'api/*',
+            'stripe/*',
+        ]);
+
+        $middleware->alias([
+            'subscription' => \App\Http\Middleware\CheckActiveSubscription::class,
+            'admin' => \App\Http\Middleware\CheckAdminAccess::class,
+            'activity' => \App\Http\Middleware\TraceUserActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
