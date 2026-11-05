@@ -5,7 +5,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import "../css/app.css";
 
 // Lazy-loaded route components (code-splitting)
-const App = lazy(() => import("./App.jsx"));
+const App = lazy(() => import("./app.jsx"));
 const LandingPage = lazy(() => import("./LandingPage.jsx"));
 const LoginView = lazy(() => import("./views/LoginView.jsx"));
 const RegisterView = lazy(() => import("./views/RegisterView.jsx"));
