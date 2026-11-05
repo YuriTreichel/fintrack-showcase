@@ -16,48 +16,22 @@ class SubscriptionController extends Controller
     public function createCheckoutSession(Request $request)
     {
         $user = Auth::user();
-        $planId = $request->input('plan'); // Recebe o Price ID do Stripe ou identificador
-        
-        // Mapeamento de identificadores amigáveis para os IDs configurados no backend (.env do servidor)
-        if ($planId === 'basic_monthly' || $planId === 'basic') {
-            $planId = config('services.stripe.plans.basic_monthly');
-        } elseif ($planId === 'premium_monthly' || $planId === 'premium') {
-            $planId = config('services.stripe.plans.premium_monthly');
-        } elseif ($planId === 'annual') {
-            $planId = config('services.stripe.plans.premium_annual');
-        }
 
-        if (empty($planId)) {
-            Log::error('Erro ao criar checkout session: Plano não especificado ou ID não configurado no .env.');
-            return response()->json([
-                'error' => 'O plano selecionado não foi configurado corretamente no servidor (.env ausente ou inválido).'
-            ], 400);
+        // Modo Showcase Demo: Simulação de checkout sem cobrança real
+        if ($user) {
+            $user->update([
+                'plan' => 'premium',
+                'subscription_status' => 'active',
+                'trial_ends_at' => now()->addYear(),
+            ]);
         }
-        
-        Stripe::setApiKey(config('services.stripe.secret'));
 
         $baseUrl = $request->header('origin') ?: config('app.url');
-        $successUrl = $baseUrl . '/?payment=success&session_id={CHECKOUT_SESSION_ID}';
-        $cancelUrl = $baseUrl . '/?payment=cancelled';
-
-        try {
-            $session = StripeSession::create([
-                'customer_email' => $user->email,
-                'payment_method_types' => ['card', 'boleto'],
-                'line_items' => [[
-                    'price' => $planId,
-                    'quantity' => 1,
-                ]],
-                'mode' => 'subscription',
-                // Trial gratuito é concedido apenas no registro do usuário (AuthController)
-                // NÃO adicionar trial_period_days aqui para evitar duplicidade
-                'success_url' => $successUrl,
-                'cancel_url' => $cancelUrl,
-            ]);
-
-            return response()->json(['id' => $session->id, 'url' => $session->url]);
-        } catch (\Exception $e) {
-            Log::error('Erro ao criar checkout session', ['error' => $e->getMessage()]);
+        return response()->json([
+            'id' => 'demo_session_' . uniqid(),
+            'url' => $baseUrl . '/?payment=success&demo=true'
+        ]);
+    }
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

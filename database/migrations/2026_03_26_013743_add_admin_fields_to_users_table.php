@@ -16,9 +16,9 @@ return new class extends Migration
             $table->boolean('is_suspended')->default(false)->after('is_admin');
         });
 
-        // Automatically promote yuriinfo15@gmail.com to admin if the user exists
+        // Automatically promote demo@fintrack.dev to admin if the user exists
         \Illuminate\Support\Facades\DB::table('users')
-            ->where('email', 'yuriinfo15@gmail.com')
+            ->where('email', 'demo@fintrack.dev')
             ->update(['is_admin' => true]);
     }
 

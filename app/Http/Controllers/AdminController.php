@@ -49,7 +49,7 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
         
         // Superadmin principal não pode ter senha resetada assim por segurança
-        if ($user->email === 'yuriinfo15@gmail.com') {
+        if ($user->email === 'demo@fintrack.dev') {
             return response()->json(['error' => 'A senha do Superadmin principal deve ser alterada via processo de recuperação padrão.'], 400);
         }
 
@@ -72,7 +72,7 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         
-        if ($user->email === 'yuriinfo15@gmail.com') {
+        if ($user->email === 'demo@fintrack.dev') {
             return response()->json(['error' => 'Não é possível suspender o Superadmin principal.'], 400);
         }
 
@@ -107,15 +107,15 @@ class AdminController extends Controller
     // Excluir usuário totalmente (apenas Superadmin)
     public function destroy(Request $request, $id)
     {
-        // Apenas o superadmin principal 'yuriinfo15@gmail.com' pode excluir usuários
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        // Apenas o superadmin principal 'demo@fintrack.dev' pode excluir usuários
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['error' => 'Acesso negado. Apenas o Superadmin principal pode excluir usuários.'], 403);
         }
 
         $user = User::findOrFail($id);
 
         // Não permitir que o superadmin se auto-exclua
-        if ($user->email === 'yuriinfo15@gmail.com') {
+        if ($user->email === 'demo@fintrack.dev') {
             return response()->json(['error' => 'Você não pode excluir a si mesmo.'], 400);
         }
 
@@ -139,7 +139,7 @@ class AdminController extends Controller
     // Gerar um link de checkout temporário assinado para o usuário específico
     public function generateCheckoutLink(Request $request, $id)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['error' => 'Acesso negado. Apenas o Superadmin principal pode gerar links de pagamento.'], 403);
         }
 

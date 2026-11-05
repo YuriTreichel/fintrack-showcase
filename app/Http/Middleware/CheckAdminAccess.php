@@ -15,7 +15,7 @@ class CheckAdminAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->is_admin || $request->user()->email !== 'yuriinfo15@gmail.com') {
+        if (!$request->user() || !$request->user()->is_admin || $request->user()->email !== 'demo@fintrack.dev') {
             return response()->json([
                 'error' => 'Acesso negado. Apenas o Superadmin principal pode realizar esta ação.'
             ], 403);

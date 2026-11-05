@@ -336,21 +336,21 @@ export default function AdminUserModal({ user, onClose, onSuccess, showConfirm, 
               
               <div className={cn(
                 "grid grid-cols-1 gap-3",
-                currentUser?.email?.toLowerCase() === 'yuriinfo15@gmail.com' ? "sm:grid-cols-4" : "sm:grid-cols-3"
+                currentUser?.email?.toLowerCase() === 'demo@fintrack.dev' ? "sm:grid-cols-4" : "sm:grid-cols-3"
               )}>
                 <ActionButton 
                     icon={<KeyRound size={18} />} 
                     label="Resetar Senha" 
                     onClick={resetPassword} 
                     loading={reseting}
-                    disabled={user.email === 'yuriinfo15@gmail.com'}
+                    disabled={user.email === 'demo@fintrack.dev'}
                 />
                 <ActionButton 
                     icon={<UserX size={18} />} 
                     label={formData.is_suspended ? "Restaurar" : "Suspender"} 
                     color={formData.is_suspended ? "mint" : "rose"}
                     onClick={() => setFormData({...formData, is_suspended: !formData.is_suspended})} 
-                    disabled={user.email === 'yuriinfo15@gmail.com'}
+                    disabled={user.email === 'demo@fintrack.dev'}
                 />
                 <ActionButton 
                     icon={<Fingerprint size={18} />} 
@@ -358,14 +358,14 @@ export default function AdminUserModal({ user, onClose, onSuccess, showConfirm, 
                     onClick={handleImpersonate}
                     disabled={formData.is_suspended}
                 />
-                {currentUser?.email?.toLowerCase() === 'yuriinfo15@gmail.com' && (
+                {currentUser?.email?.toLowerCase() === 'demo@fintrack.dev' && (
                   <ActionButton 
                       icon={<Trash2 size={18} />} 
                       label="Excluir" 
                       color="rose"
                       onClick={handleDeleteUser}
                       loading={deleting}
-                      disabled={user.email === 'yuriinfo15@gmail.com'}
+                      disabled={user.email === 'demo@fintrack.dev'}
                   />
                 )}
               </div>
@@ -384,7 +384,7 @@ export default function AdminUserModal({ user, onClose, onSuccess, showConfirm, 
             </div>
 
             {/* Seção: Links de Assinatura Direta */}
-            {currentUser?.email?.toLowerCase() === 'yuriinfo15@gmail.com' && (
+            {currentUser?.email?.toLowerCase() === 'demo@fintrack.dev' && (
               <div className="space-y-4">
                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Crown size={12} /> Links de Pagamento Exclusivos

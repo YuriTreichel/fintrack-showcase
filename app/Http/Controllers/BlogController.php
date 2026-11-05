@@ -40,8 +40,8 @@ class BlogController extends Controller
      */
     public function indexAdmin(Request $request)
     {
-        // Only allow yuriinfo15@gmail.com
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        // Only allow demo@fintrack.dev
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -54,7 +54,7 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -99,7 +99,7 @@ class BlogController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -157,7 +157,7 @@ class BlogController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -178,7 +178,7 @@ class BlogController extends Controller
      */
     public function uploadImage(Request $request)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -210,7 +210,7 @@ class BlogController extends Controller
 
     public function storeCategory(Request $request)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -228,7 +228,7 @@ class BlogController extends Controller
 
     public function destroyCategory(Request $request, $id)
     {
-        if ($request->user()->email !== 'yuriinfo15@gmail.com') {
+        if ($request->user()->email !== 'demo@fintrack.dev') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

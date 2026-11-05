@@ -516,7 +516,7 @@ export default function App() {
         id: "debts",
         label: "Ir para Dívidas",
         action: () => {
-          if (userPlan === 'basic' && user?.email !== 'yuriinfo15@gmail.com') {
+          if (userPlan === 'basic' && user?.email !== 'demo@fintrack.dev') {
             window.dispatchEvent(new CustomEvent('requireUpgrade', { detail: 'O Gerenciador de Dívidas é exclusivo do Plano Premium.' }));
           } else {
             navigate("/debts");
@@ -1250,7 +1250,7 @@ export default function App() {
             isPremium={true}
           />
 
-          {user?.email === 'yuriinfo15@gmail.com' && (
+          {user?.email === 'demo@fintrack.dev' && (
             <>
               <NavItem
                 icon={<ShieldCheck size={20} />}
@@ -1627,7 +1627,7 @@ export default function App() {
                   isPremium={true}
                 />
 
-                {user?.email === 'yuriinfo15@gmail.com' && (
+                {user?.email === 'demo@fintrack.dev' && (
                   <>
                     <NavItem
                       icon={<ShieldCheck size={20} />}
@@ -1757,7 +1757,7 @@ export default function App() {
             FinTrack
           </h1>
           <a
-            href="https://wa.me/5554999204077?text=Olá Yuri, estou no sistema do FinTrack e preciso de suporte."
+            href="https://wa.me/18005550199?text=Olá Yuri, estou no sistema do FinTrack e preciso de suporte."
             target="_blank"
             rel="noopener noreferrer"
             className="p-3 rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors min-h-[44px] text-zinc-900 dark:text-white flex items-center justify-center"
@@ -1869,7 +1869,7 @@ export default function App() {
             </div>
 
             <a
-              href="https://wa.me/5554999204077?text=Olá Yuri, estou no sistema do FinTrack e preciso de suporte."
+              href="https://wa.me/18005550199?text=Olá Yuri, estou no sistema do FinTrack e preciso de suporte."
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-full transition-all border bg-fin-surface text-zinc-500 dark:text-zinc-400 hover:text-fin-mint border-zinc-900/10 dark:border-white/5 hover:bg-zinc-900/5 dark:hover:bg-white/5"
@@ -2072,11 +2072,11 @@ export default function App() {
 
           <Route 
             path="admin/users" 
-            element={user?.email === 'yuriinfo15@gmail.com' ? <AdminUsersView showConfirm={showConfirm} showToast={showToast} /> : <Navigate to="/" replace />} 
+            element={user?.email === 'demo@fintrack.dev' ? <AdminUsersView showConfirm={showConfirm} showToast={showToast} /> : <Navigate to="/" replace />} 
           />
           <Route 
             path="admin/blog" 
-            element={user?.email === 'yuriinfo15@gmail.com' ? <AdminBlogView /> : <Navigate to="/" replace />} 
+            element={user?.email === 'demo@fintrack.dev' ? <AdminBlogView /> : <Navigate to="/" replace />} 
           />
           <Route 
             path="debts" 
@@ -2415,7 +2415,7 @@ function NavItem({
   const isProfile = variant === "profile";
   const { userPlan } = useFinStore();
   const { user } = useFinStore();
-  const isLocked = isPremium && userPlan === "basic" && user?.email !== 'yuriinfo15@gmail.com';
+  const isLocked = isPremium && userPlan === "basic" && user?.email !== 'demo@fintrack.dev';
 
   const handleClick = (e) => {
     if (isLocked) {

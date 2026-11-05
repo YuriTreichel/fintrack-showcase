@@ -41,7 +41,7 @@ const WhatsAppCTA = () => {
 
             <div className="shrink-0">
               <a
-                href="https://wa.me/5554999204077?text=Olá Yuri, estou na landing page do FinTrack e gostaria de tirar uma dúvida."
+                href="https://wa.me/18005550199?text=Olá Yuri, estou na landing page do FinTrack e gostaria de tirar uma dúvida."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative flex items-center gap-4 bg-[#98e5dd] text-[#020617] px-10 py-6 rounded-[24px] font-black text-xl hover:scale-105 active:scale-95 transition-all animate-glow-mint-lg"

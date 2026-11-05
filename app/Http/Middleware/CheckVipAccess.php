@@ -11,7 +11,7 @@ class CheckVipAccess
     public function handle(Request $request, Closure $next): Response
     {
         // Administrador principal sempre tem acesso
-        if ($request->user() && $request->user()->email === 'yuriinfo15@gmail.com') {
+        if ($request->user() && $request->user()->email === 'demo@fintrack.dev') {
             return $next($request);
         }
 
