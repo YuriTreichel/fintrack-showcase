@@ -23,13 +23,9 @@ export default function BlogPageView() {
 
   const fetchData = async () => {
     try {
-      const baseUrl = window.location.hostname.includes("localhost") 
-        ? `${window.location.protocol}//${window.location.host}` 
-        : "https://app.fintrackweb.com.br";
-      
       const [postsRes, catsRes] = await Promise.all([
-        fetch(`${baseUrl}/api/blog/posts`),
-        fetch(`${baseUrl}/api/blog/categories`)
+        fetch("/api/blog/posts"),
+        fetch("/api/blog/categories")
       ]);
 
       if (postsRes.ok) setPosts(await postsRes.json());
@@ -64,11 +60,7 @@ export default function BlogPageView() {
 
   const getImageUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
-    const host = window.location.hostname.includes("localhost") 
-      ? `${window.location.protocol}//${window.location.host}` 
-      : "https://app.fintrackweb.com.br";
-    return `${host}${url}`;
+    return url;
   };
 
   return (

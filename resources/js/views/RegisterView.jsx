@@ -12,10 +12,7 @@ export default function RegisterView() {
   }
 
   const getMainUrl = (path = "") => {
-    const hostname = window.location.hostname;
-    const isLocal = hostname.includes("localhost");
-    if (isLocal) return `http://localhost:8000${path}`;
-    return `https://fintrackweb.com.br${path}`;
+    return path || "/";
   };
 
   const [loading, setLoading] = useState(false);

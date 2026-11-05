@@ -26,18 +26,14 @@ export default function BlogPostView() {
 
   const fetchPost = async () => {
     try {
-      const baseUrl = window.location.hostname.includes("localhost") 
-        ? `${window.location.protocol}//${window.location.host}` 
-        : "https://app.fintrackweb.com.br";
-      
-      const res = await fetch(`${baseUrl}/api/blog/posts/${slug}`);
+      const res = await fetch(`/api/blog/posts/${slug}`);
       if (res.ok) {
         const data = await res.json();
         setPost(data);
         document.title = `${data.title} | FinTrack Pro`;
 
         // Fetch related posts (same category)
-        const relRes = await fetch(`${baseUrl}/api/blog/posts`);
+        const relRes = await fetch("/api/blog/posts");
         if (relRes.ok) {
             const allPosts = await relRes.json();
             setRelatedPosts(allPosts.filter(p => p.id !== data.id && p.blog_category_id === data.blog_category_id).slice(0, 3));
@@ -54,11 +50,7 @@ export default function BlogPostView() {
 
   const getImageUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
-    const host = window.location.hostname.includes("localhost") 
-      ? `${window.location.protocol}//${window.location.host}` 
-      : "https://app.fintrackweb.com.br";
-    return `${host}${url}`;
+    return url;
   };
 
   const handleShare = (platform) => {
@@ -252,7 +244,7 @@ export default function BlogPostView() {
                     Junte-se a milhares de usuários que já estão organizando suas finanças com o FinTrack Pro.
                 </p>
                 <a
-                    href="https://app.fintrackweb.com.br/register"
+                    href="/register"
                     className="inline-flex items-center gap-3 bg-[#98e5dd] text-[#020617] px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_40px_rgba(152,229,221,0.2)] active:scale-95"
                 >
                     Testar Grátis Agora

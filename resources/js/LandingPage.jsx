@@ -23,13 +23,9 @@ import VisualHero from "./components/landing/VisualHero";
 // Components
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-/* ===== HELPER DE SUBDOMÍNIO ===== */
+/* ===== HELPER DE ROTA INTERNA DO SHOWCASE ===== */
 const getAppUrl = (path = "") => {
-  const isLocal = window.location.hostname.includes("localhost");
-  const baseUrl = isLocal
-    ? "http://app.localhost:8000"
-    : "https://app.fintrackweb.com.br";
-  return `${baseUrl}${path}`;
+  return path || "/";
 };
 
 

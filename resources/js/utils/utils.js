@@ -3,11 +3,7 @@ import { parseISO, addMonths } from 'date-fns';
 export const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 export const getAppUrl = (path = "") => {
-  const isLocal = window.location.hostname.includes("localhost");
-  const baseUrl = isLocal
-    ? "http://app.localhost:8000"
-    : "https://app.fintrackweb.com.br";
-  return `${baseUrl}${path}`;
+  return path || "/";
 };
 
 export const scrollToSection = (id) => {

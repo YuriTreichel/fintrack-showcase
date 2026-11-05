@@ -37,7 +37,7 @@ const Footer = () => {
       },
       { 
         label: "E-mail Suporte", 
-        href: "mailto:contato@fintrackweb.com.br",
+        href: "mailto:demo@fintrack.dev",
         isExternal: true 
       },
     ]
@@ -77,7 +77,7 @@ const Footer = () => {
               <a href="https://wa.me/18005550199" target="_blank" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-[#98e5dd] hover:border-[#98e5dd]/30 transition-all">
                 <MessageCircle size={18} />
               </a>
-              <a href="mailto:contato@fintrackweb.com.br" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-[#98e5dd] hover:border-[#98e5dd]/30 transition-all">
+              <a href="mailto:demo@fintrack.dev" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-[#98e5dd] hover:border-[#98e5dd]/30 transition-all">
                 <Mail size={18} />
               </a>
             </div>

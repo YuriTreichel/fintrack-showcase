@@ -9,14 +9,14 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://fintrackweb.com.br/">
+    <meta property="og:url" content="{{ url('/') }}">
     <meta property="og:title" content="FinTrack Pro | Gestão Financeira Inteligente">
     <meta property="og:description" content="Chega de planilhas complexas. Assuma o controle total do seu dinheiro com uma interface premium e simples.">
     <meta property="og:image" content="{{ asset('og-image.png') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://fintrackweb.com.br/">
+    <meta property="twitter:url" content="{{ url('/') }}">
     <meta property="twitter:title" content="FinTrack Pro | Gestão Financeira Inteligente">
     <meta property="twitter:description" content="Organize suas finanças de forma premium e descomplicada.">
     <meta property="twitter:image" content="{{ asset('og-image.png') }}">
