@@ -209,43 +209,43 @@ import CustomSelect from "./components/ui/CustomSelect";
 import CustomDatePicker from "./components/ui/CustomDatePicker";
 
 // Páginas
-const Dashboard = lazy(() => import("./views/Dashboard"));
-const TransactionsView = lazy(() => import("./views/TransactionsView"));
-const SettingsView = lazy(() => import("./views/SettingsView"));
-const ProfileView = lazy(() => import("./views/ProfileView"));
-const ReportsView = lazy(() => import("./views/ReportsView"));
-const CategoriesView = lazy(() => import("./views/CategoriesView"));
-const CardsView = lazy(() => import("./views/CardsView"));
-const AccountsView = lazy(() => import("./views/AccountsView"));
-const BudgetsView = lazy(() => import("./views/BudgetsView"));
-const GoalsView = lazy(() => import("./views/GoalsView"));
+const Dashboard = lazy(() => import("./views/Dashboard.jsx"));
+const TransactionsView = lazy(() => import("./views/TransactionsView.jsx"));
+const SettingsView = lazy(() => import("./views/SettingsView.jsx"));
+const ProfileView = lazy(() => import("./views/ProfileView.jsx"));
+const ReportsView = lazy(() => import("./views/ReportsView.jsx"));
+const CategoriesView = lazy(() => import("./views/CategoriesView.jsx"));
+const CardsView = lazy(() => import("./views/CardsView.jsx"));
+const AccountsView = lazy(() => import("./views/AccountsView.jsx"));
+const BudgetsView = lazy(() => import("./views/BudgetsView.jsx"));
+const GoalsView = lazy(() => import("./views/GoalsView.jsx"));
 
-const AdminUsersView = lazy(() => import("./views/AdminUsersView"));
-const AdminBlogView = lazy(() => import("./views/AdminBlogView"));
-const WealthView = lazy(() => import("./views/WealthView"));
-const CryptoMarket = lazy(() => import("./views/CryptoMarket"));
-const CryptoDetails = lazy(() => import("./views/CryptoDetails"));
-const StockMarket = lazy(() => import("./views/StockMarket"));
-const AssetHistoryView = lazy(() => import("./views/AssetHistoryView"));
-const WealthReportsView = lazy(() => import("./views/WealthReportsView"));
-const DebtsView = lazy(() => import("./views/DebtsView"));
+const AdminUsersView = lazy(() => import("./views/AdminUsersView.jsx"));
+const AdminBlogView = lazy(() => import("./views/AdminBlogView.jsx"));
+const WealthView = lazy(() => import("./views/WealthView.jsx"));
+const CryptoMarket = lazy(() => import("./views/CryptoMarket.jsx"));
+const CryptoDetails = lazy(() => import("./views/CryptoDetails.jsx"));
+const StockMarket = lazy(() => import("./views/StockMarket.jsx"));
+const AssetHistoryView = lazy(() => import("./views/AssetHistoryView.jsx"));
+const WealthReportsView = lazy(() => import("./views/WealthReportsView.jsx"));
+const DebtsView = lazy(() => import("./views/DebtsView.jsx"));
 
 // Modais
-const CategoryModal = lazy(() => import("./modals/CategoryModal"));
-const AccountModal = lazy(() => import("./modals/AccountModal"));
-const TransactionModal = lazy(() => import("./modals/TransactionModal"));
-const CardModal = lazy(() => import("./modals/CardModal"));
-const ConfirmModal = lazy(() => import("./modals/ConfirmModal"));
-const QuickEffectiveModal = lazy(() => import("./modals/QuickEffectiveModal"));
-const ShareModal = lazy(() => import("./modals/ShareModal"));
-const UpgradeModal = lazy(() => import("./modals/UpgradeModal"));
+const CategoryModal = lazy(() => import("./modals/CategoryModal.jsx"));
+const AccountModal = lazy(() => import("./modals/AccountModal.jsx"));
+const TransactionModal = lazy(() => import("./modals/TransactionModal.jsx"));
+const CardModal = lazy(() => import("./modals/CardModal.jsx"));
+const ConfirmModal = lazy(() => import("./modals/ConfirmModal.jsx"));
+const QuickEffectiveModal = lazy(() => import("./modals/QuickEffectiveModal.jsx"));
+const ShareModal = lazy(() => import("./modals/ShareModal.jsx"));
+const UpgradeModal = lazy(() => import("./modals/UpgradeModal.jsx"));
 
 // Componentes UI
 import TransactionRow from "./components/ui/TransactionRow";
 import StatCard from "./components/ui/StatCard";
 
 // Visão de Preços (Onboarding)
-const PricingView = lazy(() => import("./views/PricingView"));
+const PricingView = lazy(() => import("./views/PricingView.jsx"));
 import TrialBanner from "./components/ui/TrialBanner";
 
 export default function App() {

@@ -248,12 +248,12 @@ const AnimatedNumber = ({ value, suffix = "" }) => {
 };
 
 // Lazy components (abaixo do fold - lazy OK pois não afetam LCP)
-const Features = lazy(() => import("./components/landing/Features"));
-const PricingSection = lazy(() => import("./components/landing/PricingSection"));
-const FaqSection = lazy(() => import("./components/landing/FaqSection"));
-const Footer = lazy(() => import("./components/landing/Footer"));
-const HowItWorksSection = lazy(() => import("./components/landing/HowItWorksSection"));
-const ComparisonSection = lazy(() => import("./components/landing/ComparisonSection"));
+const Features = lazy(() => import("./components/landing/Features.jsx"));
+const PricingSection = lazy(() => import("./components/landing/PricingSection.jsx"));
+const FaqSection = lazy(() => import("./components/landing/FaqSection.jsx"));
+const Footer = lazy(() => import("./components/landing/Footer.jsx"));
+const HowItWorksSection = lazy(() => import("./components/landing/HowItWorksSection.jsx"));
+const ComparisonSection = lazy(() => import("./components/landing/ComparisonSection.jsx"));
 
 // Loading Fallback
 const SectionLoading = () => (
