@@ -24,3 +24,4 @@ php artisan view:cache
 echo "==> Starting Nginx and PHP-FPM on port ${PORT:-80}..."
 php-fpm -D
 exec nginx -g "daemon off;"
+
