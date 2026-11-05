@@ -6,6 +6,12 @@ if [ ! -f /var/www/.env ]; then
     cp /var/www/.env.example /var/www/.env
 fi
 
+# Ensure APP_KEY is populated if not provided via environment variable
+if [ -z "$APP_KEY" ]; then
+    echo "==> Generating fallback application key..."
+    php artisan key:generate --force
+fi
+
 # Ensure SQLite database exists
 mkdir -p /var/www/database
 touch /var/www/database/database.sqlite
