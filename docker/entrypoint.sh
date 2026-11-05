@@ -12,13 +12,19 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
-# Ensure SQLite database exists
+# Ensure SQLite database exists and has writable permissions
 mkdir -p /var/www/database
 touch /var/www/database/database.sqlite
+chown -R www-data:www-data /var/www/database /var/www/storage /var/www/bootstrap/cache
+chmod -R 777 /var/www/database
+chmod 666 /var/www/database/database.sqlite
+chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Run migrations and seeders if not seeded
 echo "==> Running migrations & seeding demo data..."
 php artisan migrate --force --seed
+chown -R www-data:www-data /var/www/database
+chmod 666 /var/www/database/database.sqlite
 
 # Cache configurations for production performance
 echo "==> Optimizing caches..."
