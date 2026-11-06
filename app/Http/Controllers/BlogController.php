@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogCategory;
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -46,6 +47,7 @@ class BlogController extends Controller
         }
 
         $posts = Post::with('blogCategory')->orderBy('created_at', 'desc')->get();
+
         return response()->json($posts);
     }
 
@@ -63,11 +65,11 @@ class BlogController extends Controller
             'content' => 'required|string',
             'is_published' => 'boolean',
             'blog_category_id' => 'nullable|exists:blog_categories,id',
-            'image' => 'nullable|image|max:5120' // Max 5MB
+            'image' => 'nullable|image|max:5120', // Max 5MB
         ]);
 
         $data = $request->only(['title', 'content', 'is_published', 'blog_category_id']);
-        
+
         // Generate unique slug
         $slug = Str::slug($data['title']);
         $originalSlug = $slug;
@@ -81,7 +83,7 @@ class BlogController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('blog', 'public');
             if ($path) {
-                $data['image_url'] = '/storage/' . $path;
+                $data['image_url'] = '/storage/'.$path;
             }
         }
 
@@ -110,7 +112,7 @@ class BlogController extends Controller
             'content' => 'required|string',
             'is_published' => 'boolean',
             'blog_category_id' => 'nullable|exists:blog_categories,id',
-            'image' => 'nullable|image|max:5120'
+            'image' => 'nullable|image|max:5120',
         ]);
 
         $data = $request->only(['title', 'content', 'is_published', 'blog_category_id']);
@@ -135,15 +137,15 @@ class BlogController extends Controller
             }
             $path = $request->file('image')->store('blog', 'public');
             if ($path) {
-                $data['image_url'] = '/storage/' . $path;
+                $data['image_url'] = '/storage/'.$path;
             }
         }
 
         // Handle publish date
         $isPublished = $data['is_published'] ?? false;
-        if ($isPublished && !$post->is_published) {
+        if ($isPublished && ! $post->is_published) {
             $data['published_at'] = now();
-        } else if (!$isPublished) {
+        } elseif (! $isPublished) {
             $data['published_at'] = null;
         }
 
@@ -183,13 +185,14 @@ class BlogController extends Controller
         }
 
         $request->validate([
-            'image' => 'required|image|max:5120'
+            'image' => 'required|image|max:5120',
         ]);
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('blog/content', 'public');
+
             return response()->json([
-                'url' => '/storage/' . $path
+                'url' => '/storage/'.$path,
             ]);
         }
 
@@ -201,7 +204,7 @@ class BlogController extends Controller
      */
     public function indexCategories()
     {
-        $categories = \App\Models\BlogCategory::withCount(['posts' => function ($query) {
+        $categories = BlogCategory::withCount(['posts' => function ($query) {
             $query->where('is_published', true);
         }])->orderBy('name')->get();
 
@@ -218,9 +221,9 @@ class BlogController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $category = \App\Models\BlogCategory::create([
+        $category = BlogCategory::create([
             'name' => $request->name,
-            'slug' => \Illuminate\Support\Str::slug($request->name),
+            'slug' => Str::slug($request->name),
         ]);
 
         return response()->json($category, 201);
@@ -232,7 +235,7 @@ class BlogController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $category = \App\Models\BlogCategory::findOrFail($id);
+        $category = BlogCategory::findOrFail($id);
         $category->delete();
 
         return response()->json(['message' => 'Category deleted successfully']);

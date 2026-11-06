@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Debt;
+use App\Models\Transaction;
 use App\Services\DebtService;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DebtController extends Controller
 {
@@ -19,6 +20,7 @@ class DebtController extends Controller
     public function index(Request $request)
     {
         $strategy = $request->query('strategy', 'default');
+
         return $this->debtService->getOrderedDebts($request->user(), $strategy);
     }
 
@@ -41,7 +43,7 @@ class DebtController extends Controller
         $user = $request->user();
 
         // Default original_amount to amount if not provided
-        if (!isset($validated['original_amount'])) {
+        if (! isset($validated['original_amount'])) {
             $validated['original_amount'] = $validated['amount'];
         }
 
@@ -80,6 +82,7 @@ class DebtController extends Controller
         }
 
         $debt = $user->debts()->create($validated);
+
         return response()->json($debt, 201);
     }
 
@@ -102,6 +105,7 @@ class DebtController extends Controller
         ]);
 
         $debt->update($validated);
+
         return response()->json($debt);
     }
 
@@ -135,7 +139,7 @@ class DebtController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $transaction = \App\Models\Transaction::create([
+        $transaction = Transaction::create([
             'user_id' => $request->user()->id,
             'description' => "Pagamento: {$debt->description}",
             'amount' => $validated['amount'],
@@ -145,7 +149,7 @@ class DebtController extends Controller
             'account_id' => $validated['account_id'],
             'category_id' => $validated['category_id'],
             'card_id' => $validated['card_id'] ?? null,
-            'notes' => $validated['notes'] ?? "Pagamento registrado via Simulador de Dívidas.",
+            'notes' => $validated['notes'] ?? 'Pagamento registrado via Simulador de Dívidas.',
             'debt_id' => $debt->id,
         ]);
 
@@ -157,7 +161,7 @@ class DebtController extends Controller
         return response()->json([
             'message' => 'Pagamento registrado com sucesso',
             'transaction' => $transaction,
-            'debt' => $debt
+            'debt' => $debt,
         ]);
     }
 
@@ -168,6 +172,7 @@ class DebtController extends Controller
         }
 
         $debt->delete();
+
         return response()->json(['message' => 'Debt deleted']);
     }
 }

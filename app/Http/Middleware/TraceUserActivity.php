@@ -11,14 +11,14 @@ class TraceUserActivity
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         if ($user = $request->user()) {
             // Silenciosamente atualiza a data da última atividade
             // Desativamos timestamps para não alterar o 'updated_at' global do sistema
-            $user->timestamps = false; 
+            $user->timestamps = false;
             $user->last_activity_at = now();
             $user->save();
         }

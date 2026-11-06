@@ -29,10 +29,9 @@ class PayCardInvoiceActionTest extends TestCase
         $card = Card::create([
             'user_id' => $user->id,
             'name' => 'Sapphire Preferred',
-            'credit_limit' => 10000.00,
+            'limit' => 10000.00,
             'closing_day' => 15,
             'due_day' => 25,
-            'account_id' => $account->id,
         ]);
 
         // Transactions inside the cycle (closing day 15, month 5 -> cycle: April 16 to May 15)
@@ -99,10 +98,9 @@ class PayCardInvoiceActionTest extends TestCase
         $card = Card::create([
             'user_id' => $owner->id,
             'name' => 'Owner Card',
-            'credit_limit' => 2000.00,
+            'limit' => 2000.00,
             'closing_day' => 10,
             'due_day' => 20,
-            'account_id' => $account->id,
         ]);
 
         $this->expectException(InvalidArgumentException::class);
@@ -125,10 +123,9 @@ class PayCardInvoiceActionTest extends TestCase
         $card = Card::create([
             'user_id' => $user->id,
             'name' => 'Card Without Expenses',
-            'credit_limit' => 2000.00,
+            'limit' => 2000.00,
             'closing_day' => 10,
             'due_day' => 20,
-            'account_id' => $account->id,
         ]);
 
         $this->expectException(InvalidArgumentException::class);

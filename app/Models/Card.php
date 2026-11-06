@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Card extends Model
 {
-    protected $fillable = ['name', 'closing_day', 'due_day', 'account_id'];
+    protected $fillable = ['user_id', 'name', 'limit', 'brand', 'closing_day', 'due_day'];
 
     public function account()
     {

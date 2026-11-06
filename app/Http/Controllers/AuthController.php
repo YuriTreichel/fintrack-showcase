@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Mail\WelcomeMail;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\WelcomeMail;
 
 class AuthController extends Controller
 {
@@ -14,7 +14,7 @@ class AuthController extends Controller
     {
         if ($request->has('email')) {
             $request->merge([
-                'email' => strtolower(trim($request->email))
+                'email' => strtolower(trim($request->email)),
             ]);
         }
 
@@ -24,7 +24,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
             'whatsapp' => 'nullable|string|max:20',
         ]);
- 
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -41,12 +41,12 @@ class AuthController extends Controller
         try {
             Mail::to($user->email)->send(new WelcomeMail($user));
         } catch (\Exception $e) {
-            \Log::error("Erro ao enviar e-mail de boas-vindas: " . $e->getMessage());
+            \Log::error('Erro ao enviar e-mail de boas-vindas: '.$e->getMessage());
         }
 
         return response()->json([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
@@ -54,26 +54,26 @@ class AuthController extends Controller
     {
         if ($request->has('email')) {
             $request->merge([
-                'email' => strtolower(trim($request->email))
+                'email' => strtolower(trim($request->email)),
             ]);
         }
 
         $data = $request->validate([
             'email' => 'required|string|email',
-            'password' => 'required|string'
+            'password' => 'required|string',
         ]);
 
         $user = User::where('email', $data['email'])->first();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
-                'message' => 'Credenciais inválidas'
+                'message' => 'Credenciais inválidas',
             ], 401);
         }
 
         if ($user->is_suspended) {
             return response()->json([
-                'message' => 'Sua conta foi suspensa temporária ou permanentemente. Entre em contato com o suporte.'
+                'message' => 'Sua conta foi suspensa temporária ou permanentemente. Entre em contato com o suporte.',
             ], 403);
         }
 
@@ -84,7 +84,7 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
@@ -96,7 +96,7 @@ class AuthController extends Controller
     public function updateThemeColor(Request $request)
     {
         $data = $request->validate([
-            'theme_color' => 'required|string|max:50'
+            'theme_color' => 'required|string|max:50',
         ]);
 
         $user = $request->user();
@@ -109,6 +109,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Deslogado com sucesso']);
     }
 

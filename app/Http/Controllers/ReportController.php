@@ -3,19 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
+use App\Models\Category;
 use App\Models\Goal;
 use App\Models\Transaction;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ReportController extends Controller
 {
     private function checkPremium()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
-        if (!$user->hasPremiumPlan()) {
+        if (! $user->hasPremiumPlan()) {
             abort(403, 'Esta funcionalidade é exclusiva para o Plano Premium.');
         }
     }
@@ -46,13 +48,13 @@ class ReportController extends Controller
                 ->sum('amount');
 
             $report = $budgets->map(function ($budget) use ($user, $now, $totalIncome) {
-                $budgetAmount = $budget->type === 'percentage' 
+                $budgetAmount = $budget->type === 'percentage'
                     ? ($totalIncome * ($budget->percentage_value / 100))
                     : (float) $budget->amount;
 
                 $categoryIds = [$budget->category_id];
                 if ($budget->category_id) {
-                    $childrenIds = \App\Models\Category::where('parent_id', $budget->category_id)->pluck('id')->toArray();
+                    $childrenIds = Category::where('parent_id', $budget->category_id)->pluck('id')->toArray();
                     $categoryIds = array_merge($categoryIds, $childrenIds);
                 }
 
@@ -78,7 +80,7 @@ class ReportController extends Controller
             });
 
             return response()->json($report);
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        } catch (HttpException $e) {
             return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -94,8 +96,8 @@ class ReportController extends Controller
             $goals = Goal::where('user_id', $user->id)->get();
 
             $report = $goals->map(function ($goal) {
-                $percentage = $goal->target_amount > 0 
-                    ? round(($goal->current_amount / $goal->target_amount) * 100, 2) 
+                $percentage = $goal->target_amount > 0
+                    ? round(($goal->current_amount / $goal->target_amount) * 100, 2)
                     : 0;
 
                 return [
@@ -112,7 +114,7 @@ class ReportController extends Controller
             });
 
             return response()->json($report);
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        } catch (HttpException $e) {
             return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

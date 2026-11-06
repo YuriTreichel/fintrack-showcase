@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckActiveSubscription;
+use App\Http\Middleware\CheckAdminAccess;
+use App\Http\Middleware\TraceUserActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,9 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'subscription' => \App\Http\Middleware\CheckActiveSubscription::class,
-            'admin' => \App\Http\Middleware\CheckAdminAccess::class,
-            'activity' => \App\Http\Middleware\TraceUserActivity::class,
+            'subscription' => CheckActiveSubscription::class,
+            'admin' => CheckAdminAccess::class,
+            'activity' => TraceUserActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

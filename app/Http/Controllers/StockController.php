@@ -18,9 +18,6 @@ class StockController extends Controller
 
     /**
      * Get the consolidated stock market data with local pagination.
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function getMarketStocks(Request $request): JsonResponse
     {
@@ -34,23 +31,27 @@ class StockController extends Controller
         // 1. Filter by Search or Category
         $filtered = collect($allData)->filter(function ($item) use ($search, $category) {
             // Search filter
-            if (!empty($search)) {
+            if (! empty($search)) {
                 $query = strtolower($search);
                 $tickerMatch = str_contains(strtolower($item['stock'] ?? ''), $query);
                 $nameMatch = str_contains(strtolower($item['name'] ?? ''), $query);
-                if (!$tickerMatch && !$nameMatch) return false;
+                if (! $tickerMatch && ! $nameMatch) {
+                    return false;
+                }
             }
 
             // Category filter
             if ($category !== 'all') {
-                if (($item['category'] ?? '') !== $category) return false;
+                if (($item['category'] ?? '') !== $category) {
+                    return false;
+                }
             }
 
             return true;
         });
 
         $total = $filtered->count();
-        
+
         // 2. Paginate
         $paginatedItems = $filtered->slice(($page - 1) * $perPage, $perPage)->values();
 
@@ -89,9 +90,6 @@ class StockController extends Controller
 
     /**
      * Search for assets on the market (Alias if needed, though getMarketStocks handles search now).
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function search(Request $request): JsonResponse
     {

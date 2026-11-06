@@ -12,7 +12,7 @@ return new class extends Migration
             // Adiciona Limite e Bandeira
             $table->decimal('limit', 15, 2)->default(0)->after('name');
             $table->string('brand')->nullable()->after('limit');
-            
+
             // Remove a ligação rígida com a conta bancária
             if (Schema::hasColumn('cards', 'account_id')) {
                 $table->dropForeign(['account_id']);

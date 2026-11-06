@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Verifica se a coluna NÃO existe antes de tentar criar
-            if (!Schema::hasColumn('users', 'stripe_id')) {
+            if (! Schema::hasColumn('users', 'stripe_id')) {
                 $table->string('stripe_id')->nullable()->index();
             }
-            if (!Schema::hasColumn('users', 'pm_type')) {
+            if (! Schema::hasColumn('users', 'pm_type')) {
                 $table->string('pm_type')->nullable();
             }
-            if (!Schema::hasColumn('users', 'pm_last_four')) {
+            if (! Schema::hasColumn('users', 'pm_last_four')) {
                 $table->string('pm_last_four', 4)->nullable();
             }
-            if (!Schema::hasColumn('users', 'trial_ends_at')) {
+            if (! Schema::hasColumn('users', 'trial_ends_at')) {
                 $table->timestamp('trial_ends_at')->nullable();
             }
         });

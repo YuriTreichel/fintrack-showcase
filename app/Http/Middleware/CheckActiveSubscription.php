@@ -12,10 +12,10 @@ class CheckActiveSubscription
     {
         $user = $request->user();
 
-        if ($user && !$user->hasActivePlan()) {
+        if ($user && ! $user->hasActivePlan()) {
             return response()->json([
-                'message'                => 'Acesso negado. Você precisa de uma assinatura ativa para usar o FinTrack.',
-                'requires_subscription'  => true,
+                'message' => 'Acesso negado. Você precisa de uma assinatura ativa para usar o FinTrack.',
+                'requires_subscription' => true,
             ], 403);
         }
 

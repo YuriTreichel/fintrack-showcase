@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BudgetController extends Controller
 {
     private function checkPremium()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
-        if (!$user->hasPremiumPlan()) {
+        if (! $user->hasPremiumPlan()) {
             abort(403, 'Esta funcionalidade é exclusiva para o Plano Premium.');
         }
     }
@@ -26,6 +27,7 @@ class BudgetController extends Controller
                 ->leftJoin('categories as c', 'b.category_id', '=', 'c.id')
                 ->select('b.*', 'c.name as category_name')
                 ->get();
+
             return response()->json($budgets);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() == 403 ? 403 : 500);
@@ -50,8 +52,9 @@ class BudgetController extends Controller
             $data['user_id'] = Auth::id();
             $data['created_at'] = now();
             $data['updated_at'] = now();
-            
+
             $id = DB::table('budgets')->insertGetId($data);
+
             return response()->json(['id' => $id]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() == 403 ? 403 : 500);
@@ -80,7 +83,10 @@ class BudgetController extends Controller
                 ->where('user_id', Auth::id())
                 ->update($data);
 
-            if (!$updated) return response()->json(['error' => 'Budget not found or unauthorized'], 404);
+            if (! $updated) {
+                return response()->json(['error' => 'Budget not found or unauthorized'], 404);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() == 403 ? 403 : 500);
@@ -96,7 +102,10 @@ class BudgetController extends Controller
                 ->where('user_id', Auth::id())
                 ->delete();
 
-            if (!$deleted) return response()->json(['error' => 'Budget not found or unauthorized'], 404);
+            if (! $deleted) {
+                return response()->json(['error' => 'Budget not found or unauthorized'], 404);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() == 403 ? 403 : 500);

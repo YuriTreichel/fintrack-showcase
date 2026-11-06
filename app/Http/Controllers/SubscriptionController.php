@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Stripe\Stripe;
-use Stripe\Customer;
 use Stripe\Checkout\Session as StripeSession;
-use App\Models\User;
-use Carbon\Carbon;
+use Stripe\Exception\SignatureVerificationException;
+use Stripe\Stripe;
+use Stripe\Subscription;
+use Stripe\Webhook;
 
 class SubscriptionController extends Controller
 {
@@ -27,33 +29,32 @@ class SubscriptionController extends Controller
         }
 
         $baseUrl = $request->header('origin') ?: config('app.url');
+
         return response()->json([
-            'id' => 'demo_session_' . uniqid(),
-            'url' => $baseUrl . '/?payment=success&demo=true'
+            'id' => 'demo_session_'.uniqid(),
+            'url' => $baseUrl.'/?payment=success&demo=true',
         ]);
-    }
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
     }
 
     public function billingPortal(Request $request)
     {
         try {
             $user = Auth::user();
-            
-            if (!$user->stripe_id) {
+
+            if (! $user->stripe_id) {
                 return response()->json(['error' => 'Você ainda não possui uma conta de faturamento ativa.'], 400);
             }
 
             // Geramos o URL do portal com retorno para a página de perfil
-            $portalUrl = $user->billingPortalUrl(config('app.url') . '/profile');
+            $portalUrl = $user->billingPortalUrl(config('app.url').'/profile');
 
             return response()->json([
-                'url' => $portalUrl
+                'url' => $portalUrl,
             ]);
         } catch (\Throwable $e) {
             Log::error('Erro ao gerar portal do cliente', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Erro ao abrir o gerenciador: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Erro ao abrir o gerenciador: '.$e->getMessage()], 500);
         }
     }
 
@@ -61,7 +62,7 @@ class SubscriptionController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->stripe_id) {
+        if (! $user->stripe_id) {
             return response()->json(['error' => 'Utilizador não tem uma conta Stripe associada.'], 400);
         }
 
@@ -69,7 +70,7 @@ class SubscriptionController extends Controller
             Stripe::setApiKey(config('services.stripe.secret'));
 
             // Procurar assinaturas ativas para este cliente
-            $subscriptions = \Stripe\Subscription::all([
+            $subscriptions = Subscription::all([
                 'customer' => $user->stripe_id,
                 'status' => 'active',
                 'limit' => 1,
@@ -77,7 +78,7 @@ class SubscriptionController extends Controller
 
             if (count($subscriptions->data) === 0) {
                 // Tenta procurar trialing também
-                $subscriptions = \Stripe\Subscription::all([
+                $subscriptions = Subscription::all([
                     'customer' => $user->stripe_id,
                     'status' => 'trialing',
                     'limit' => 1,
@@ -91,36 +92,37 @@ class SubscriptionController extends Controller
             $subscriptionId = $subscriptions->data[0]->id;
 
             // Marcar para cancelar ao fim do período e obter o objeto atualizado
-            $updatedSubscription = \Stripe\Subscription::update($subscriptionId, [
+            $updatedSubscription = Subscription::update($subscriptionId, [
                 'cancel_at_period_end' => true,
             ]);
 
             // Atualizamos localmente também para feedback imediato
             $timestamp = $updatedSubscription->current_period_end ?? $subscriptions->data[0]->current_period_end ?? null;
-            
+
             if ($timestamp) {
                 $user->subscription_ends_at = Carbon::createFromTimestamp($timestamp);
             } else {
                 $user->subscription_ends_at = now()->addMonth();
             }
-            
+
             // Forçamos a persistência total usando update direto para evitar problemas de instância
             $user->update([
-                'subscription_ends_at' => $user->subscription_ends_at
+                'subscription_ends_at' => $user->subscription_ends_at,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Assinatura cancelada com sucesso. Terá acesso até ' . $user->subscription_ends_at->format('d/m/Y'),
-                'ends_at' => $user->subscription_ends_at
+                'message' => 'Assinatura cancelada com sucesso. Terá acesso até '.$user->subscription_ends_at->format('d/m/Y'),
+                'ends_at' => $user->subscription_ends_at,
             ]);
         } catch (\Throwable $e) {
             Log::error('Erro ao cancelar assinatura', [
                 'error' => $e->getMessage(),
                 'user' => $user->email,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            return response()->json(['error' => 'Erro ao processar o cancelamento: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Erro ao processar o cancelamento: '.$e->getMessage()], 500);
         }
     }
 
@@ -129,7 +131,7 @@ class SubscriptionController extends Controller
         $user = Auth::user();
         $sessionId = $request->input('session_id');
 
-        if (!$sessionId) {
+        if (! $sessionId) {
             return response()->json(['success' => false, 'message' => 'Nenhum session_id fornecido.']);
         }
 
@@ -140,22 +142,24 @@ class SubscriptionController extends Controller
             if ($session->payment_status === 'paid' && $user->subscription_status !== 'active') {
                 $user->subscription_status = 'active';
                 $user->stripe_id = $session->customer;
-                
+
                 if ($session->subscription) {
-                    $subscription = \Stripe\Subscription::retrieve($session->subscription);
+                    $subscription = Subscription::retrieve($session->subscription);
                     $priceId = $subscription->items->data[0]->price->id ?? null;
                     $user->plan = $this->resolvePlanName($priceId);
                 } else {
                     $user->plan = 'premium';
                 }
-                
+
                 $user->save();
+
                 return response()->json(['success' => true, 'plan' => $user->plan]);
             }
 
             return response()->json(['success' => true, 'plan' => $user->plan]);
         } catch (\Exception $e) {
             Log::error('Erro ao verificar checkout session', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
@@ -167,14 +171,16 @@ class SubscriptionController extends Controller
         $endpoint_secret = config('services.stripe.webhook_secret') ?: env('STRIPE_WEBHOOK_SECRET');
 
         try {
-            $event = \Stripe\Webhook::constructEvent(
+            $event = Webhook::constructEvent(
                 $payload, $sig_header, $endpoint_secret
             );
         } catch (\UnexpectedValueException $e) {
             Log::error('Stripe Webhook: Paylaod inválido', ['error' => $e->getMessage()]);
+
             return response('Invalid payload', 400);
-        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+        } catch (SignatureVerificationException $e) {
             Log::error('Stripe Webhook: Assinatura inválida', ['error' => $e->getMessage()]);
+
             return response('Invalid signature', 400);
         }
 
@@ -188,13 +194,13 @@ class SubscriptionController extends Controller
                 if ($user) {
                     $user->stripe_id = $session->customer;
                     $user->subscription_status = 'active';
-                    
+
                     if ($session->subscription) {
                         try {
                             Stripe::setApiKey(config('services.stripe.secret'));
-                            $subscription = \Stripe\Subscription::retrieve($session->subscription);
+                            $subscription = Subscription::retrieve($session->subscription);
                             $priceId = $subscription->items->data[0]->price->id ?? null;
-                            
+
                             $user->plan = $this->resolvePlanName($priceId);
                             $user->trial_ends_at = $subscription->trial_end ? Carbon::createFromTimestamp($subscription->trial_end) : null;
                             $user->subscription_ends_at = null;
@@ -203,10 +209,10 @@ class SubscriptionController extends Controller
                         }
                     } else {
                         // Pagamentos únicos (lifetime) - caso um dia utilizes
-                        $user->plan = 'premium'; 
+                        $user->plan = 'premium';
                         $user->subscription_ends_at = null;
                     }
-                    
+
                     $user->save();
                     Log::info("Checkout concluído para utilizador {$user->email}, plano definido como {$user->plan}");
                 }
@@ -218,29 +224,29 @@ class SubscriptionController extends Controller
 
                 if ($user) {
                     $priceId = $subscription->items->data[0]->price->id ?? null;
-                    
+
                     if (in_array($subscription->status, ['active', 'trialing'])) {
                         $user->subscription_status = 'active';
                         $user->plan = $this->resolvePlanName($priceId);
-                        
+
                         // Se estiver marcado para cancelar ao fim do período, guardamos a data
                         // Adicionamos uma lógica para NÃO apagar se já tivermos uma data (proteção contra race conditions)
-                        if ($subscription->cancel_at_period_end && !empty($subscription->current_period_end)) {
+                        if ($subscription->cancel_at_period_end && ! empty($subscription->current_period_end)) {
                             $user->subscription_ends_at = Carbon::createFromTimestamp($subscription->current_period_end);
-                        } else if (!$subscription->cancel_at_period_end) {
+                        } elseif (! $subscription->cancel_at_period_end) {
                             // Só limpamos se explicitamente o Stripe disser que a renovação voltou a estar ativa
                             $user->subscription_ends_at = null;
                         }
-                    } else if ($subscription->status === 'past_due') {
+                    } elseif ($subscription->status === 'past_due') {
                         $user->subscription_status = 'past_due';
                     } else {
                         // Se estiver incomplete, incomplete_expired, etc.
                         $user->subscription_status = 'canceled';
                         $user->subscription_ends_at = now();
                     }
-                    
+
                     $user->save();
-                    Log::info("Assinatura atualizada pelo Stripe para {$user->email}, status: {$user->subscription_status}, cancel_at_period_end: " . ($subscription->cancel_at_period_end ? 'true' : 'false'));
+                    Log::info("Assinatura atualizada pelo Stripe para {$user->email}, status: {$user->subscription_status}, cancel_at_period_end: ".($subscription->cancel_at_period_end ? 'true' : 'false'));
                 }
                 break;
 
@@ -288,12 +294,14 @@ class SubscriptionController extends Controller
      */
     private function findUserBySession($session): ?User
     {
-        if (!empty($session->customer_email)) {
+        if (! empty($session->customer_email)) {
             $user = User::where('email', $session->customer_email)->first();
-            if ($user) return $user;
+            if ($user) {
+                return $user;
+            }
         }
 
-        if (!empty($session->customer)) {
+        if (! empty($session->customer)) {
             return User::where('stripe_id', $session->customer)->first();
         }
 
@@ -305,7 +313,9 @@ class SubscriptionController extends Controller
      */
     private function resolvePlanName(?string $priceId): string
     {
-        if (!$priceId) return 'premium';
+        if (! $priceId) {
+            return 'premium';
+        }
 
         $basicMonthly = config('services.stripe.plans.basic_monthly');
 
@@ -343,8 +353,8 @@ class SubscriptionController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $baseUrl = config('app.url');
-        $successUrl = $baseUrl . '/?payment=success&session_id={CHECKOUT_SESSION_ID}';
-        $cancelUrl = $baseUrl . '/?payment=cancelled';
+        $successUrl = $baseUrl.'/?payment=success&session_id={CHECKOUT_SESSION_ID}';
+        $cancelUrl = $baseUrl.'/?payment=cancelled';
 
         try {
             $session = StripeSession::create([
@@ -362,7 +372,7 @@ class SubscriptionController extends Controller
             return redirect()->away($session->url);
         } catch (\Exception $e) {
             Log::error('Erro ao redirecionar pelo link direto do admin', ['error' => $e->getMessage()]);
-            abort(500, 'Erro ao criar sessão de pagamento no Stripe: ' . $e->getMessage());
+            abort(500, 'Erro ao criar sessão de pagamento no Stripe: '.$e->getMessage());
         }
     }
 }

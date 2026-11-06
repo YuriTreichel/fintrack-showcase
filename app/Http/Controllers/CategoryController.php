@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -20,6 +20,7 @@ class CategoryController extends Controller
                 ->leftJoin('users as u', 'c.user_id', '=', 'u.id')
                 ->select('c.*', 'u.name as owner_name')
                 ->get();
+
             return response()->json($categories);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -33,15 +34,17 @@ class CategoryController extends Controller
                 'name' => 'required|string|max:255',
                 'parent_id' => 'nullable|exists:categories,id',
                 'type' => 'required|in:Income,Expense',
-                'icon' => 'nullable|string|max:50'
+                'icon' => 'nullable|string|max:50',
             ]);
             $data['user_id'] = Auth::id();
             $id = DB::table('categories')->insertGetId($data);
+
             return response()->json(['id' => $id]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
     public function update(Request $request, $id)
     {
         try {
@@ -49,7 +52,7 @@ class CategoryController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'parent_id' => 'nullable|exists:categories,id',
                 'type' => 'sometimes|required|in:Income,Expense',
-                'icon' => 'nullable|string|max:50'
+                'icon' => 'nullable|string|max:50',
             ]);
 
             $updated = DB::table('categories')
@@ -57,7 +60,10 @@ class CategoryController extends Controller
                 ->where('user_id', Auth::id())
                 ->update($data);
 
-            if (!$updated) return response()->json(['error' => 'Category not found or unauthorized'], 404);
+            if (! $updated) {
+                return response()->json(['error' => 'Category not found or unauthorized'], 404);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -72,7 +78,10 @@ class CategoryController extends Controller
                 ->where('user_id', Auth::id())
                 ->delete();
 
-            if (!$deleted) return response()->json(['error' => 'Category not found or unauthorized'], 404);
+            if (! $deleted) {
+                return response()->json(['error' => 'Category not found or unauthorized'], 404);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

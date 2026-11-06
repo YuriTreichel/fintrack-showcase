@@ -1,30 +1,32 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\AccountController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CardController;
-use App\Http\Controllers\ShareController;
-use App\Http\Controllers\BudgetController;
-use App\Http\Controllers\GoalController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CardController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DebtController;
-
+use App\Http\Controllers\GoalController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ShareController;
 use App\Http\Controllers\StockController;
-use App\Http\Middleware\CheckVipAccess;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\BlogController;
+use App\Http\Controllers\TransactionAIController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckVipAccess;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Rotas do Blog (Públicas)
 Route::get('/blog/posts', [BlogController::class, 'indexPublic']);
@@ -44,15 +46,20 @@ Route::post('/stripe/webhook', [SubscriptionController::class, 'webhook']);
 Route::middleware(['web', 'activity'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    
+
     // Retorna o plano atual para o Frontend redirecionar (com fallback para 'none')
     Route::get('/plan', function (Request $request) {
         $user = $request->user();
-        if ($user->hasPremiumPlan()) return response()->json(['plan' => 'premium']);
-        if ($user->hasBasicPlan())   return response()->json(['plan' => 'basic']);
+        if ($user->hasPremiumPlan()) {
+            return response()->json(['plan' => 'premium']);
+        }
+        if ($user->hasBasicPlan()) {
+            return response()->json(['plan' => 'basic']);
+        }
+
         return response()->json(['plan' => 'none']);
     });
-    
+
     // Rota de checkout, limpa e independente do Cashier
     Route::post('/checkout', [SubscriptionController::class, 'createCheckoutSession']);
     Route::get('/checkout-session', [SubscriptionController::class, 'getSubscriptionStatus']);
@@ -60,21 +67,21 @@ Route::middleware(['web', 'activity'])->group(function () {
     Route::post('/subscription/portal', [SubscriptionController::class, 'billingPortal']);
 
     // Perfil e Senha (Em web para permitir acesso mesmo sem plano ativo)
-    Route::put('/user/profile', [\App\Http\Controllers\UserController::class, 'updateProfile']);
-    Route::put('/user/password', [\App\Http\Controllers\UserController::class, 'updatePassword']);
+    Route::put('/user/profile', [UserController::class, 'updateProfile']);
+    Route::put('/user/password', [UserController::class, 'updatePassword']);
     Route::put('/user/theme-color', [AuthController::class, 'updateThemeColor']);
     Route::put('/user/complete-tour', [AuthController::class, 'completeTour']);
 });
 
 // Rotas de Administração (Superadmin)
 Route::middleware(['web', 'activity', 'admin'])->group(function () {
-    Route::get('/admin/users', [\App\Http\Controllers\AdminController::class, 'listUsers']);
-    Route::put('/admin/users/{id}/subscription', [\App\Http\Controllers\AdminController::class, 'updateSubscription']);
-    Route::post('/admin/users/{id}/impersonate', [\App\Http\Controllers\AdminController::class, 'impersonate']);
-    Route::put('/admin/users/{id}/suspend', [\App\Http\Controllers\AdminController::class, 'suspend']);
-    Route::post('/admin/users/{id}/reset-password', [\App\Http\Controllers\AdminController::class, 'resetPassword']);
-    Route::delete('/admin/users/{id}', [\App\Http\Controllers\AdminController::class, 'destroy']);
-    Route::post('/admin/users/{id}/generate-checkout-link', [\App\Http\Controllers\AdminController::class, 'generateCheckoutLink']);
+    Route::get('/admin/users', [AdminController::class, 'listUsers']);
+    Route::put('/admin/users/{id}/subscription', [AdminController::class, 'updateSubscription']);
+    Route::post('/admin/users/{id}/impersonate', [AdminController::class, 'impersonate']);
+    Route::put('/admin/users/{id}/suspend', [AdminController::class, 'suspend']);
+    Route::post('/admin/users/{id}/reset-password', [AdminController::class, 'resetPassword']);
+    Route::delete('/admin/users/{id}', [AdminController::class, 'destroy']);
+    Route::post('/admin/users/{id}/generate-checkout-link', [AdminController::class, 'generateCheckoutLink']);
 
     // Rotas do Blog (Admin)
     Route::get('/admin/blog/posts', [BlogController::class, 'indexAdmin']);
@@ -90,12 +97,13 @@ Route::middleware(['web', 'activity', 'admin'])->group(function () {
 
 // Rotas autenticadas + Exigem Assinatura Ativa (Plano Básico ou Premium)
 Route::middleware(['web', 'activity', 'subscription'])->group(function () {
-    
+
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::get('/transactions', [TransactionController::class, 'index']);
     Route::post('/transactions', [TransactionController::class, 'store']);
-    Route::post('/transactions/ai', [\App\Http\Controllers\TransactionAIController::class, 'store']);
+    Route::post('/transactions/ai', [TransactionAIController::class, 'store']);
+    Route::post('/ai/parse', [TransactionAIController::class, 'parse']);
     Route::delete('/transactions/bulk', [TransactionController::class, 'bulkDestroy']);
     Route::put('/transactions/{id}', [TransactionController::class, 'update']);
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
@@ -157,9 +165,9 @@ Route::middleware(['web', 'activity', 'subscription'])->group(function () {
         Route::delete('/assets/purchase/{id}', [AssetController::class, 'destroyPurchase']);
 
         // Relatórios Premium
-        Route::get('/reports/budget', [\App\Http\Controllers\ReportController::class, 'budgetReport']);
-        Route::get('/reports/goals', [\App\Http\Controllers\ReportController::class, 'goalsReport']);
-        
+        Route::get('/reports/budget', [ReportController::class, 'budgetReport']);
+        Route::get('/reports/goals', [ReportController::class, 'goalsReport']);
+
         // Mercado e Cotações
         Route::get('/market/crypto', [AssetController::class, 'getMarketCoins']);
         Route::get('/market/crypto/{id}', [AssetController::class, 'getCryptoDetails']);

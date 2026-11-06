@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\TransactionResource;
+use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TransactionController extends Controller
 {
@@ -58,14 +61,23 @@ class TransactionController extends Controller
                 'tags' => 'nullable|string',
                 'attachment' => 'nullable|file',
                 'ignore_in_reports' => 'nullable|boolean',
-                'goal_id' => 'nullable|exists:goals,id'
+                'goal_id' => 'nullable|exists:goals,id',
             ]);
+
+            // Enforce account ownership to prevent IDOR
+            $accountOwned = DB::table('accounts')->where('id', $data['account_id'])->where('user_id', Auth::id())->exists();
+            if (! $accountOwned) {
+                return response()->json([
+                    'message' => 'The selected account id is invalid.',
+                    'errors' => ['account_id' => ['The selected account is invalid or unauthorized.']],
+                ], 422);
+            }
 
             $data['user_id'] = Auth::id();
 
             // Regra de Negócio: Transações de Cartão de Crédito sempre nascem como 'Pending'
             // Elas só se tornam 'Paid' quando a fatura é paga via CardController@payInvoice
-            if (!empty($data['card_id'])) {
+            if (! empty($data['card_id'])) {
                 $data['status'] = 'Pending';
             }
 
@@ -83,9 +95,9 @@ class TransactionController extends Controller
 
             // Fixed transactions automatically create 120 monthly instances (10 years)
             // This ensures they appear in all months
-            if (isset($data['is_fixed']) && $data['is_fixed'] && !(isset($data['is_repeated']) && $data['is_repeated'])) {
+            if (isset($data['is_fixed']) && $data['is_fixed'] && ! (isset($data['is_repeated']) && $data['is_repeated'])) {
                 $baseDate = Carbon::parse($data['date']);
-                
+
                 // Insert first record to get parent_id
                 $firstData = array_merge($data, [
                     'status' => $data['status'],
@@ -99,7 +111,7 @@ class TransactionController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                
+
                 $parentId = DB::table('transactions')->insertGetId($firstData);
                 $installments = [];
 
@@ -141,18 +153,23 @@ class TransactionController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                
+
                 $parentId = DB::table('transactions')->insertGetId($firstData);
                 $installments = [];
 
                 for ($i = 2; $i <= $data['repeat_times']; $i++) {
                     $multiplier = ($i - 1) * $freq;
                     $date = $baseDate->copy();
-                    
-                    if ($period === 'daily') $date->addDays($multiplier);
-                    elseif ($period === 'weekly') $date->addWeeks($multiplier);
-                    elseif ($period === 'yearly') $date->addYears($multiplier);
-                    else $date->addMonths($multiplier); // monthly default
+
+                    if ($period === 'daily') {
+                        $date->addDays($multiplier);
+                    } elseif ($period === 'weekly') {
+                        $date->addWeeks($multiplier);
+                    } elseif ($period === 'yearly') {
+                        $date->addYears($multiplier);
+                    } else {
+                        $date->addMonths($multiplier);
+                    } // monthly default
 
                     $installments[] = array_merge($data, [
                         'date' => $date->toDateString(),
@@ -179,10 +196,10 @@ class TransactionController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                
+
                 $parentId = DB::table('transactions')->insertGetId($firstData);
                 $installments = [];
-                
+
                 for ($i = 2; $i <= $data['total_installments']; $i++) {
                     $date = $baseDate->copy()->addMonths($i - 1)->toDateString();
                     $installments[] = array_merge($data, [
@@ -207,8 +224,13 @@ class TransactionController extends Controller
                 $this->updateGoalBalance($data['goal_id'], $data['amount']);
             }
 
-            return response()->json(['id' => $id]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+            $tx = Transaction::with(['account', 'toAccount', 'category', 'card'])->find($id);
+
+            return response()->json([
+                'id' => $id,
+                'data' => $tx ? (new TransactionResource($tx))->resolve() : null,
+            ], 201);
+        } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->errors()->first()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -225,7 +247,7 @@ class TransactionController extends Controller
                 ->where('user_id', Auth::id())
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 return response()->json(['error' => 'Transaction not found or unauthorized'], 404);
             }
 
@@ -248,7 +270,7 @@ class TransactionController extends Controller
                 'tags' => 'nullable|string',
                 'attachment' => 'nullable|file',
                 'ignore_in_reports' => 'nullable|boolean',
-                'goal_id' => 'nullable|exists:goals,id'
+                'goal_id' => 'nullable|exists:goals,id',
             ]);
 
             if ($request->hasFile('attachment')) {
@@ -264,7 +286,7 @@ class TransactionController extends Controller
             }
 
             // Regra de Negócio: Transações de Cartão de Crédito sempre são 'Pending'
-            if (!empty($data['card_id'])) {
+            if (! empty($data['card_id'])) {
                 $data['status'] = 'Pending';
             }
 
@@ -300,16 +322,16 @@ class TransactionController extends Controller
                     if ($data['goal_id']) {
                         $this->updateGoalBalance($data['goal_id'], $data['amount'] ?? $transaction->amount);
                     }
-                } 
+                }
                 // If only amount changed and it's the same goal
-                elseif (isset($data['amount']) && $transaction->goal_id && (!isset($data['goal_id']) || $data['goal_id'] == $transaction->goal_id)) {
+                elseif (isset($data['amount']) && $transaction->goal_id && (! isset($data['goal_id']) || $data['goal_id'] == $transaction->goal_id)) {
                     $delta = $data['amount'] - $transaction->amount;
                     $this->updateGoalBalance($transaction->goal_id, $delta);
                 }
             }
 
             return response()->json(['success' => true]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['error' => $e->validator->errors()->first()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -326,7 +348,7 @@ class TransactionController extends Controller
                 ->where('user_id', Auth::id())
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 return response()->json(['error' => 'Not found or unauthorized'], 404);
             }
 
@@ -364,7 +386,7 @@ class TransactionController extends Controller
         try {
             $data = $request->validate([
                 'ids' => 'required|array|min:1',
-                'ids.*' => 'integer'
+                'ids.*' => 'integer',
             ]);
 
             $userId = Auth::id();
@@ -380,6 +402,7 @@ class TransactionController extends Controller
 
             if ($transactions->isEmpty()) {
                 DB::rollBack();
+
                 return response()->json(['error' => 'Nenhuma transação encontrada ou autorizada para exclusão.'], 404);
             }
 
@@ -400,25 +423,28 @@ class TransactionController extends Controller
             return response()->json([
                 'success' => true,
                 'deleted_count' => $deletedCount,
-                'message' => "{$deletedCount} transações excluídas com sucesso."
+                'message' => "{$deletedCount} transações excluídas com sucesso.",
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->validator->errors()->first()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
     private function updateGoalBalance($goalId, $amountDelta)
     {
-        if (!$goalId) return;
-        
+        if (! $goalId) {
+            return;
+        }
+
         DB::table('goals')
             ->where('id', $goalId)
             ->where('user_id', Auth::id())
             ->increment('current_amount', $amountDelta);
     }
 }
-

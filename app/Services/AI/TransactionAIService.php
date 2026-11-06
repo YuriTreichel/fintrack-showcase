@@ -18,6 +18,11 @@ class TransactionAIService
      */
     public function parseNaturalLanguage(string $text, array $history = [], array $availableCategories = []): ?array
     {
+        return $this->parseTextToTransaction($text, $history, $availableCategories);
+    }
+
+    public function parseTextToTransaction(string $text, array $history = [], array $availableCategories = []): ?array
+    {
         $categoriesList = ! empty($availableCategories)
             ? implode(', ', $availableCategories)
             : 'Food, Transport, Housing, Utilities, Leisure, Salary, Freelance, Investment';

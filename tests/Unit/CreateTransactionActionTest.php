@@ -44,9 +44,9 @@ class CreateTransactionActionTest extends TestCase
         $this->assertEquals(33.34, (float) $installments[0]->amount); // Rounding adjustment on 1st
         $this->assertEquals(33.33, (float) $installments[1]->amount);
         $this->assertEquals(33.33, (float) $installments[2]->amount);
-        $this->assertEquals('2026-05-01', $installments[0]->date->format('Y-m-d'));
-        $this->assertEquals('2026-06-01', $installments[1]->date->format('Y-m-d'));
-        $this->assertEquals('2026-07-01', $installments[2]->date->format('Y-m-d'));
+        $this->assertEquals('2026-05-01', substr((string) $installments[0]->date, 0, 10));
+        $this->assertEquals('2026-06-01', substr((string) $installments[1]->date, 0, 10));
+        $this->assertEquals('2026-07-01', substr((string) $installments[2]->date, 0, 10));
     }
 
     public function test_credit_card_transaction_is_enforced_as_pending(): void
@@ -61,10 +61,9 @@ class CreateTransactionActionTest extends TestCase
         $card = Card::create([
             'user_id' => $user->id,
             'name' => 'Gold Card',
-            'credit_limit' => 2000,
+            'limit' => 2000,
             'closing_day' => 10,
             'due_day' => 17,
-            'account_id' => $account->id,
         ]);
 
         $action = new CreateTransactionAction;

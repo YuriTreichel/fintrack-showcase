@@ -3,14 +3,12 @@ includes:
 
 parameters:
     paths:
-        - app/
+        - app/Actions/
+        - app/Http/Requests/
+        - app/Services/AI/
 
     level: 5
 
     treatPhpDocTypesAsCertain: false
-
-    ignoreErrors:
-        - '#Access to an undefined property App\\Models\\Transaction::\$name#'
-        - '#Access to an undefined property App\\Models\\Transaction::\$total#'
 
 

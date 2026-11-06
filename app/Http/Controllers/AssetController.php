@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\UserAsset;
 use App\Models\UserAssetPurchase;
 use App\Services\MarketDataService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class AssetController extends Controller
 {
@@ -37,18 +37,18 @@ class AssetController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         // Find or create the main asset record
         $asset = $user->assets()
-            ->when($validated['coin_id'], function($q) use ($validated) {
+            ->when($validated['coin_id'], function ($q) use ($validated) {
                 return $q->where('coin_id', $validated['coin_id']);
             })
-            ->when(!$validated['coin_id'], function($q) use ($validated) {
+            ->when(! $validated['coin_id'], function ($q) use ($validated) {
                 return $q->where('asset_symbol', $validated['asset_symbol']);
             })
             ->first();
 
-        if (!$asset) {
+        if (! $asset) {
             $asset = $user->assets()->create([
                 'asset_symbol' => $validated['asset_symbol'],
                 'coin_id' => $validated['coin_id'],
@@ -85,6 +85,7 @@ class AssetController extends Controller
         ]);
 
         $asset->update($validated);
+
         return $asset;
     }
 
@@ -95,6 +96,7 @@ class AssetController extends Controller
         }
 
         $asset->delete();
+
         return response()->json(['message' => 'Asset deleted']);
     }
 
@@ -102,13 +104,13 @@ class AssetController extends Controller
     {
         $user = Auth::user();
         $assets = $user->assets;
-        
+
         // Fetch specific quotes for assets that have coin_id
         $coinIds = $assets->pluck('coin_id')->filter()->unique()->toArray();
         if (empty($coinIds)) {
             $coinIds = ['bitcoin', 'ethereum']; // Defaults for summary
         }
-        
+
         $quotes = $this->marketData->getCryptoPrices($coinIds);
         $usdRate = $this->marketData->getUsdToBrl();
 
@@ -116,9 +118,9 @@ class AssetController extends Controller
 
         $mappedAssets = $assets->map(function ($asset) use ($quotes, &$totalAssetsBrl) {
             $coinKey = $asset->coin_id;
-            
+
             // Fallback for older assets without coin_id
-            if (!$coinKey) {
+            if (! $coinKey) {
                 $symbol = strtolower($asset->asset_symbol);
                 $mapping = [
                     'btc' => 'bitcoin',
@@ -154,10 +156,10 @@ class AssetController extends Controller
         $mappedAccounts = $accounts->map(function ($account) use ($usdRate, $quotes, &$totalAccountsBrl) {
             $balance = $account->initial_balance; // Simplification: in a real app, calculate actual balance from transactions
             // For now, let's use a dummy calculation or assume initial_balance is the current total for this demo
-            
+
             // To be more accurate, we should probably fetch the real balance:
-            $currentBalance = $account->initial_balance; 
-            // Better: If there's a Transaction model, we should calculate it. 
+            $currentBalance = $account->initial_balance;
+            // Better: If there's a Transaction model, we should calculate it.
             // But let's stick to the prompt's focus on conversion logic.
 
             $convertedBrl = $currentBalance;
@@ -196,14 +198,14 @@ class AssetController extends Controller
     public function getMarketCoins(Request $request)
     {
         $search = $request->query('search');
-        
+
         if ($search) {
             return response()->json($this->marketData->searchMarketCoins($search));
         }
 
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 100);
-        
+
         return response()->json($this->marketData->getMarketCoins($page, $perPage));
     }
 
@@ -227,11 +229,13 @@ class AssetController extends Controller
         $symbol = $request->query('symbol');
 
         $asset = Auth::user()->assets()
-            ->when($coinId, fn($q) => $q->where('coin_id', $coinId))
-            ->when($symbol, fn($q) => $q->where('asset_symbol', $symbol))
+            ->when($coinId, fn ($q) => $q->where('coin_id', $coinId))
+            ->when($symbol, fn ($q) => $q->where('asset_symbol', $symbol))
             ->first();
 
-        if (!$asset) return response()->json([]);
+        if (! $asset) {
+            return response()->json([]);
+        }
 
         return $asset->purchases()->orderBy('purchase_date', 'desc')->get();
     }
@@ -239,7 +243,7 @@ class AssetController extends Controller
     public function getAllHistory(Request $request)
     {
         $user = Auth::user();
-        
+
         return $user->purchases()
             ->select('user_asset_purchases.*', 'user_assets.asset_symbol')
             ->orderBy('purchase_date', 'desc')
@@ -268,13 +272,14 @@ class AssetController extends Controller
     {
         $purchases = $asset->purchases;
         $totalQuantity = $purchases->sum('quantity');
-        
+
         // Calculate average price in BRL
         $totalCostBrl = $purchases->reduce(function ($carry, $p) {
             $price = $p->purchase_price;
             if ($p->currency === 'USD') {
                 $price *= ($p->exchange_rate ?? 1);
             }
+
             return $carry + ($price * $p->quantity);
         }, 0);
 

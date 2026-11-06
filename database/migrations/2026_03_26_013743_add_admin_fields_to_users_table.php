@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -17,7 +18,7 @@ return new class extends Migration
         });
 
         // Automatically promote demo@fintrack.dev to admin if the user exists
-        \Illuminate\Support\Facades\DB::table('users')
+        DB::table('users')
             ->where('email', 'demo@fintrack.dev')
             ->update(['is_admin' => true]);
     }

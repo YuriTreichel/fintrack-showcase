@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Account;
-use App\Models\Category;
-use App\Models\Transaction;
-use App\Models\Card;
-use App\Models\Goal;
 use App\Models\Budget;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Card;
+use App\Models\Category;
+use App\Models\Goal;
+use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DemoDataSeeder extends Seeder
 {
@@ -26,7 +26,7 @@ class DemoDataSeeder extends Seeder
                 'plan' => 'premium',
                 'trial_ends_at' => Carbon::now()->addDays(14),
                 'subscription_status' => 'active',
-                'tour_completed' => true
+                'tour_completed' => true,
             ]
         );
 
@@ -61,7 +61,7 @@ class DemoDataSeeder extends Seeder
                 'user_id' => $user->id,
                 'name' => $cat['name'],
                 'type' => $cat['type'],
-                'icon' => $cat['icon']
+                'icon' => $cat['icon'],
             ]);
         }
 
@@ -83,7 +83,7 @@ class DemoDataSeeder extends Seeder
             'current_amount' => 4500,
             'deadline' => Carbon::now()->addYear(),
             'color' => '#98e5dd',
-            'icon' => 'Plane'
+            'icon' => 'Plane',
         ]);
 
         // 6. Planejamento (Budgets)
@@ -92,7 +92,7 @@ class DemoDataSeeder extends Seeder
             'category_id' => $catModels['Alimentação']->id,
             'name' => 'Alimentação Mensal',
             'amount' => 1200,
-            'period' => 'monthly'
+            'period' => 'monthly',
         ]);
 
         // 7. Transações fictícias
@@ -105,7 +105,7 @@ class DemoDataSeeder extends Seeder
             'amount' => 12000,
             'date' => Carbon::now()->startOfMonth()->format('Y-m-d'),
             'type' => 'Income',
-            'status' => 'Paid'
+            'status' => 'Paid',
         ]);
 
         // Despesas Fixas
@@ -117,7 +117,7 @@ class DemoDataSeeder extends Seeder
             'amount' => 2500,
             'date' => Carbon::now()->startOfMonth()->addDays(5)->format('Y-m-d'),
             'type' => 'Expense',
-            'status' => 'Paid'
+            'status' => 'Paid',
         ]);
 
         // Despesas Variáveis
@@ -125,9 +125,13 @@ class DemoDataSeeder extends Seeder
         for ($i = 0; $i < 15; $i++) {
             $desc = $descriptions[array_rand($descriptions)];
             $catName = 'Lazer';
-            if (str_contains($desc, 'Mercado') || str_contains($desc, 'Ifood')) $catName = 'Alimentação';
-            if (str_contains($desc, 'Uber') || str_contains($desc, 'Posto')) $catName = 'Transporte';
-            
+            if (str_contains($desc, 'Mercado') || str_contains($desc, 'Ifood')) {
+                $catName = 'Alimentação';
+            }
+            if (str_contains($desc, 'Uber') || str_contains($desc, 'Posto')) {
+                $catName = 'Transporte';
+            }
+
             Transaction::create([
                 'user_id' => $user->id,
                 'account_id' => rand(0, 1) ? $nubank->id : $itau->id,
@@ -136,7 +140,7 @@ class DemoDataSeeder extends Seeder
                 'amount' => rand(20, 450),
                 'date' => Carbon::now()->subDays(rand(1, 25))->format('Y-m-d'),
                 'type' => 'Expense',
-                'status' => 'Paid'
+                'status' => 'Paid',
             ]);
         }
     }

@@ -11,13 +11,13 @@ class CheckAdminAccess
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->is_admin || $request->user()->email !== 'demo@fintrack.dev') {
+        if (! $request->user() || ! $request->user()->is_admin || $request->user()->email !== 'demo@fintrack.dev') {
             return response()->json([
-                'error' => 'Acesso negado. Apenas o Superadmin principal pode realizar esta ação.'
+                'error' => 'Acesso negado. Apenas o Superadmin principal pode realizar esta ação.',
             ], 403);
         }
 

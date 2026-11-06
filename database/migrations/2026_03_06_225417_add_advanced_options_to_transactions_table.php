@@ -37,7 +37,7 @@ return new class extends Migration
                 'repeat_times',
                 'notes',
                 'tags',
-                'ignore_in_reports'
+                'ignore_in_reports',
             ]);
         });
     }

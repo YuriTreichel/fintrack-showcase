@@ -20,12 +20,12 @@ return new class extends Migration
             $table->date('date');
             $table->enum('status', ['Paid', 'Pending'])->default('Pending');
             $table->text('observations')->nullable();
-            
+
             // Installment support
             $table->foreignId('parent_id')->nullable()->constrained('debts')->onDelete('cascade');
             $table->integer('installment_number')->nullable();
             $table->integer('total_installments')->nullable();
-            
+
             $table->timestamps();
         });
     }

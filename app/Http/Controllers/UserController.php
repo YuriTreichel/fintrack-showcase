@@ -17,7 +17,7 @@ class UserController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
         ], [
             'name.required' => 'O nome é obrigatório.',
             'email.required' => 'O e-mail é obrigatório.',
@@ -29,7 +29,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Perfil atualizado com sucesso!',
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -50,12 +50,12 @@ class UserController extends Controller
             'password.min' => 'A nova senha deve ter pelo menos 6 caracteres.',
         ]);
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'A senha atual informada está incorreta.',
                 'errors' => [
-                    'current_password' => ['A senha atual está incorreta.']
-                ]
+                    'current_password' => ['A senha atual está incorreta.'],
+                ],
             ], 422);
         }
 
@@ -64,7 +64,7 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Senha alterada com sucesso!'
+            'message' => 'Senha alterada com sucesso!',
         ]);
     }
 }

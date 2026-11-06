@@ -3,20 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-
 use Illuminate\Support\Facades\Log;
-use App\Models\Category;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    
     /**
      * The attributes that are mass assignable.
      *
@@ -74,7 +72,7 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::creating(function ($user) {
-            if (!$user->sharing_code) {
+            if (! $user->sharing_code) {
                 $user->sharing_code = static::generateUniqueSharingCode();
             }
         });
@@ -89,6 +87,7 @@ class User extends Authenticatable
         do {
             $code = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 12));
         } while (static::where('sharing_code', $code)->exists());
+
         return $code;
     }
 
@@ -223,7 +222,7 @@ class User extends Authenticatable
                 $this->categories()->create($category);
             }
         } catch (\Exception $e) {
-            Log::error("Erro ao criar categorias padrão para o usuário {$this->id}: " . $e->getMessage());
+            Log::error("Erro ao criar categorias padrão para o usuário {$this->id}: ".$e->getMessage());
         }
     }
 }

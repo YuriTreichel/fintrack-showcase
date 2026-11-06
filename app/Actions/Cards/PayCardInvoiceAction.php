@@ -17,13 +17,15 @@ class PayCardInvoiceAction
      *
      * @return array{settled_count: int, total_amount: float, payment_transaction: Transaction}
      */
-    public function execute(User $user, Card $card, int $month, int $year): array
+    public function execute(User $user, Card $card, int $month, int $year, ?int $accountId = null): array
     {
         if ($card->user_id !== $user->id) {
             throw new InvalidArgumentException('Unauthorized card settlement attempt.');
         }
 
-        return DB::transaction(function () use ($user, $card, $month, $year) {
+        $payingAccountId = $accountId ?? $card->account_id ?? $user->accounts()->first()?->id;
+
+        return DB::transaction(function () use ($user, $card, $month, $year, $payingAccountId) {
             $startDate = Carbon::create($year, $month, $card->closing_day)->subMonth()->addDay();
             $endDate = Carbon::create($year, $month, $card->closing_day);
 
@@ -46,7 +48,7 @@ class PayCardInvoiceAction
             // Create ledger entry paying the invoice from the card's linked bank account
             $paymentTransaction = Transaction::create([
                 'user_id' => $user->id,
-                'account_id' => $card->account_id,
+                'account_id' => $payingAccountId,
                 'description' => "Invoice Payment - {$card->name} ({$month}/{$year})",
                 'amount' => $totalAmount,
                 'date' => now()->toDateString(),

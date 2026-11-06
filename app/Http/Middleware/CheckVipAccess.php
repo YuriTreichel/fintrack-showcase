@@ -17,11 +17,11 @@ class CheckVipAccess
 
         // Verifica se o usuário está logado E se NÃO é VIP
         if ($request->user() && ! $request->user()->is_vip) {
-            
+
             // Retorna um erro 403 (Proibido) em formato JSON para o React
             return response()->json([
                 'message' => 'Acesso negado. Esta funcionalidade é exclusiva para usuários VIP.',
-                'requires_upgrade' => true
+                'requires_upgrade' => true,
             ], 403);
         }
 

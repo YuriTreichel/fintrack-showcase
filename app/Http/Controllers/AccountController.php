@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
@@ -67,7 +67,7 @@ class AccountController extends Controller
                 $count = DB::table('accounts')->where('user_id', $user->id)->count();
                 if ($count >= 2) {
                     return response()->json([
-                        'message'          => 'Você atingiu o limite de 2 contas bancárias do Plano Básico. Faça upgrade para o Plano Premium e cadastre contas ilimitadas!',
+                        'message' => 'Você atingiu o limite de 2 contas bancárias do Plano Básico. Faça upgrade para o Plano Premium e cadastre contas ilimitadas!',
                         'requires_upgrade' => true,
                     ], 403);
                 }
@@ -77,14 +77,15 @@ class AccountController extends Controller
                 'name' => 'required|string|max:255',
                 'type' => 'required|in:Cash,Bank,Savings',
                 'initial_balance' => 'numeric',
-                'is_main' => 'sometimes|boolean'
+                'is_main' => 'sometimes|boolean',
             ]);
             $data['user_id'] = $user->id;
 
             $id = DB::transaction(function () use ($user, $data) {
-                if (!empty($data['is_main'])) {
+                if (! empty($data['is_main'])) {
                     DB::table('accounts')->where('user_id', $user->id)->update(['is_main' => 0]);
                 }
+
                 return DB::table('accounts')->insertGetId($data);
             });
 
@@ -93,6 +94,7 @@ class AccountController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
     public function update(Request $request, $id)
     {
         try {
@@ -100,7 +102,7 @@ class AccountController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'type' => 'sometimes|required|in:Cash,Bank,Savings',
                 'initial_balance' => 'sometimes|numeric',
-                'is_main' => 'sometimes|boolean'
+                'is_main' => 'sometimes|boolean',
             ]);
 
             DB::transaction(function () use ($id, $data) {
@@ -125,13 +127,13 @@ class AccountController extends Controller
         try {
             $data = $request->validate([
                 'new_balance' => 'required|numeric',
-                'create_transaction' => 'required|boolean'
+                'create_transaction' => 'required|boolean',
             ]);
 
             $user = Auth::user();
-            
+
             $account = DB::table('accounts')->where('id', $id)->where('user_id', $user->id)->first();
-            if (!$account) {
+            if (! $account) {
                 return response()->json(['error' => 'Account not found'], 404);
             }
 
@@ -182,7 +184,7 @@ class AccountController extends Controller
                         'status' => 'Paid',
                         'is_recurring' => 0,
                         'created_at' => now(),
-                        'updated_at' => now()
+                        'updated_at' => now(),
                     ]);
                 } else {
                     // Just update initial balance so current_balance matches new_balance
@@ -206,7 +208,10 @@ class AccountController extends Controller
                 ->where('user_id', Auth::id())
                 ->delete();
 
-            if (!$deleted) return response()->json(['error' => 'Account not found or unauthorized'], 404);
+            if (! $deleted) {
+                return response()->json(['error' => 'Account not found or unauthorized'], 404);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
