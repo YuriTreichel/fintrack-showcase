@@ -78,8 +78,10 @@ class DashboardController extends Controller
                 ->whereIn('user_id', $userIds)
                 ->whereIn('type', ['Expense', 'GoalDeposit'])
                 ->where('status', 'Paid')
-                ->whereRaw('MONTH(date) = ?', [date('m')])
-                ->whereRaw('YEAR(date) = ?', [date('Y')])
+                ->whereBetween('date', [
+                    now()->startOfMonth()->toDateString(),
+                    now()->endOfMonth()->toDateString(),
+                ])
                 ->sum('amount');
 
             $expensesByCategory = DB::table('transactions as t')
@@ -107,9 +109,14 @@ class DashboardController extends Controller
                 ->whereIn('t.user_id', $userIds)
                 ->get();
 
+            $driver = DB::getDriverName();
+            $monthExpr = $driver === 'sqlite'
+                ? "strftime('%Y-%m', date) as month"
+                : "DATE_FORMAT(date, '%Y-%m') as month";
+
             $incomeVsExpenses = DB::table('transactions')
                 ->select(
-                    DB::raw("DATE_FORMAT(date, '%Y-%m') as month"),
+                    DB::raw($monthExpr),
                     DB::raw("SUM(CASE WHEN type = 'Income' THEN amount ELSE 0 END) as income"),
                     DB::raw("SUM(CASE WHEN type IN ('Expense', 'GoalDeposit') THEN amount ELSE 0 END) as expenses")
                 )
